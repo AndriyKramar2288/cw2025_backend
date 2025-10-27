@@ -11,6 +11,7 @@ import lombok.Setter;
 @NoArgsConstructor
 public class Topic {
     @Id
+    @GeneratedValue
     private long id;
     @Column(length = 255, nullable = false)
     private String name;

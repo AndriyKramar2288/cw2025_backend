@@ -5,12 +5,16 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Getter
 @Setter
 @NoArgsConstructor
 public class Compendium {
     @Id
+    @GeneratedValue
     private long id;
     @Lob
     private String notes;
@@ -20,4 +24,8 @@ public class Compendium {
     @ManyToOne
     @JoinColumn(name = "topic_id", nullable = false)
     private Topic topic;
+    private int index;
+
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "compendium")
+    private List<Concept> concepts = new ArrayList<>();
 }

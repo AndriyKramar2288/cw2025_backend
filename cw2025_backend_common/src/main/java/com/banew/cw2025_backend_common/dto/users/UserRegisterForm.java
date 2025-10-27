@@ -1,4 +1,4 @@
-package com.banew.cw2025_backend_common.dto;
+package com.banew.cw2025_backend_common.dto.users;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -10,7 +10,8 @@ public class UserRegisterForm {
     private String email;
     @NotBlank
     @Size(min = 5)
-    private String name;
+    private String username;
+    private String photoSrc;
     @NotBlank
     @Size(min = 8)
     private String password;

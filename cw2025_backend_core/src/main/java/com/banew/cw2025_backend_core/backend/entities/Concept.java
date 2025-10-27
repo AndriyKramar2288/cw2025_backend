@@ -11,12 +11,12 @@ import lombok.Setter;
 @NoArgsConstructor
 public class Concept {
     @Id
+    @GeneratedValue
     private long id;
     @Column(length = 255, nullable = false)
     private String name;
     @Lob
     private String description;
-
     @ManyToOne
     @JoinColumn(name = "compendium_id", nullable = false)
     private Compendium compendium;
