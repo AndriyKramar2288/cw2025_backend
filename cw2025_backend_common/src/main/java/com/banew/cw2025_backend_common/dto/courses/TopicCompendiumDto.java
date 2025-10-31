@@ -1,21 +1,19 @@
 package com.banew.cw2025_backend_common.dto.courses;
 
 import com.banew.cw2025_backend_common.dto.coursePlans.CoursePlanBasicDto;
-import lombok.Data;
 
 import java.util.List;
 
-@Data
-public class TopicCompendiumDto {
-    private long id;
-    private String notes;
-    private CoursePlanBasicDto.TopicBasicDto topic;
-    private List<ConceptBasicDto> concepts;
+public record TopicCompendiumDto (
+        long id,
+        String notes,
+        CoursePlanBasicDto.TopicBasicDto topic,
+        List<ConceptBasicDto> concepts
+) {
 
-    @Data
-    public static class ConceptBasicDto {
-        private Long id;
-        private String name;
-        private String description;
-    }
+    public record ConceptBasicDto (
+        Long id,
+        String name,
+        String description
+    ) { }
 }

@@ -29,20 +29,20 @@ public class CoursePlanServiceImpl implements CoursePlanService {
 
     @Override
     public CoursePlanBasicDto updateCoursePlan(UserProfile currentUser, CoursePlanBasicDto dto) {
-        CoursePlan existingPlan = coursePlanRepository.findById(dto.getId())
+        CoursePlan existingPlan = coursePlanRepository.findById(dto.id())
                 .orElseThrow(() -> new MyBadRequestException("Course with this ID was not found!"));
 
         if (!existingPlan.getAuthor().getId().equals(currentUser.getId()))
             throw new MyBadRequestException("Course with this ID is not yours!");
 
-        if (dto.getName() != null) existingPlan.setName(dto.getName());
-        if (dto.getDescription() != null) existingPlan.setDescription(dto.getDescription());
+        if (dto.name() != null) existingPlan.setName(dto.name());
+        if (dto.description() != null) existingPlan.setDescription(dto.description());
 
         existingPlan.getTopics().forEach(t -> {
-            dto.getTopics().forEach(topicBasicDto -> {
-                if (topicBasicDto.getId().equals(t.getId())) {
-                    if (topicBasicDto.getName() != null) t.setName(topicBasicDto.getName());
-                    if (topicBasicDto.getDescription() != null) t.setDescription(topicBasicDto.getDescription());
+            dto.topics().forEach(topicBasicDto -> {
+                if (topicBasicDto.id().equals(t.getId())) {
+                    if (topicBasicDto.name() != null) t.setName(topicBasicDto.name());
+                    if (topicBasicDto.description() != null) t.setDescription(topicBasicDto.description());
                 }
             });
         });

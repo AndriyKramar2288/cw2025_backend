@@ -17,43 +17,43 @@ public class GlobalExceptionHandler {
     @ResponseStatus(code = HttpStatus.BAD_REQUEST)
     @ExceptionHandler(MyBadRequestException.class)
     public BasicResult badRequestEx(MyBadRequestException ex) {
-        return BasicResult.builder()
-                .code(HttpStatus.BAD_REQUEST.value())
-                .message(ex.getMessage())
-                .build();
+        return new BasicResult(
+                ex.getMessage(),
+                HttpStatus.BAD_REQUEST.value()
+        );
     }
 
     @ResponseStatus(code = HttpStatus.BAD_REQUEST)
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public FieldExceptionResult validationExc(MethodArgumentNotValidException ex) {
-        return FieldExceptionResult.builder()
-                .fieldErrors(ex.getBindingResult().getFieldErrors()
+        return new FieldExceptionResult(
+                ex.getBindingResult().getFieldErrors()
                         .stream()
-                        .map(error -> FieldExceptionResult.FieldException.builder()
-                                .field(error.getField())
-                                .message(error.getDefaultMessage())
-                                .build())
-                        .toList())
-                .message(VALIDATION_ERROR_MESSAGE)
-                .code(HttpStatus.BAD_REQUEST.value())
-                .build();
+                        .map(error -> new FieldExceptionResult.FieldException(
+                                error.getField(),
+                                error.getDefaultMessage()
+                        ))
+                        .toList(),
+                VALIDATION_ERROR_MESSAGE,
+                HttpStatus.BAD_REQUEST.value()
+        );
     }
 
     @ResponseStatus(code = HttpStatus.BAD_REQUEST)
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public BasicResult badBody() {
-        return BasicResult.builder()
-                .message("Bad body format")
-                .code(HttpStatus.BAD_REQUEST.value())
-                .build();
+        return new BasicResult(
+                "Bad body format",
+                HttpStatus.BAD_REQUEST.value()
+        );
     }
 
     @ResponseStatus(code = HttpStatus.INTERNAL_SERVER_ERROR)
     @ExceptionHandler(Exception.class)
     public BasicResult anyEx() {
-        return BasicResult.builder()
-                .message("Internal server error")
-                .code(HttpStatus.INTERNAL_SERVER_ERROR.value())
-                .build();
+        return new BasicResult(
+                "Internal server error",
+                HttpStatus.INTERNAL_SERVER_ERROR.value()
+        );
     }
 }

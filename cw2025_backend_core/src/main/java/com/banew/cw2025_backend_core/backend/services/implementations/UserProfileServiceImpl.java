@@ -51,9 +51,9 @@ public class UserProfileServiceImpl implements UserProfileService {
     @Override
     public UserProfileBasicDto updateUser(UserProfileBasicDto dto, UserProfile previousProfile) {
 
-        if (dto.getEmail() != null) previousProfile.setEmail(dto.getEmail());
-        if (dto.getPhotoSrc() != null) previousProfile.setPhotoSrc(dto.getPhotoSrc());
-        if (dto.getUsername() != null) previousProfile.setUsername(dto.getUsername());
+        if (dto.email() != null) previousProfile.setEmail(dto.email());
+        if (dto.photoSrc() != null) previousProfile.setPhotoSrc(dto.photoSrc());
+        if (dto.username() != null) previousProfile.setUsername(dto.username());
 
         userProfileRepository.save(previousProfile);
         
@@ -62,23 +62,23 @@ public class UserProfileServiceImpl implements UserProfileService {
 
     @Override
     public UserTokenFormResult register(UserRegisterForm form) {
-        if (userProfileRepository.findByEmail(form.getEmail()).isPresent())
-            throw new RuntimeException("User with email \"" + form.getEmail() + "\" is already exist!");
+        if (userProfileRepository.findByEmail(form.email()).isPresent())
+            throw new RuntimeException("User with email \"" + form.email() + "\" is already exist!");
 
         UserProfile user = basicMapper.registerFormToUserProfile(form);
         user.setRoles(List.of("USER"));
-        user.setPassword(passwordEncoder.encode(form.getPassword()));
+        user.setPassword(passwordEncoder.encode(form.password()));
 
         userProfileRepository.save(user);
 
         String token = jwtService.encodeJwt(user);
 
-        return UserTokenFormResult.builder()
-                .token(token)
-                .code(201)
-                .message("Successful registration!")
-                .userProfile(basicMapper.userProfileToBasicDto(user))
-                .build();
+        return new UserTokenFormResult (
+                token,
+                "Successful registration!",
+                basicMapper.userProfileToBasicDto(user),
+                201
+        );
     }
 
     @Override
@@ -87,16 +87,16 @@ public class UserProfileServiceImpl implements UserProfileService {
                 "Email or password is not correct!"
         );
 
-        UserProfile user = userProfileRepository.findByEmail(form.getEmail()).orElseThrow(() -> ex);
-        if (!passwordEncoder.matches(form.getPassword(), user.getPassword())) throw ex;
+        UserProfile user = userProfileRepository.findByEmail(form.email()).orElseThrow(() -> ex);
+        if (!passwordEncoder.matches(form.password(), user.getPassword())) throw ex;
 
         String token = jwtService.encodeJwt(user);
 
-        return UserTokenFormResult.builder()
-                .token(token)
-                .code(200)
-                .message("Successful login!")
-                .userProfile(basicMapper.userProfileToBasicDto(user))
-                .build();
+        return new UserTokenFormResult (
+                token,
+                "Successful login!",
+                basicMapper.userProfileToBasicDto(user),
+                200
+        );
     }
 }

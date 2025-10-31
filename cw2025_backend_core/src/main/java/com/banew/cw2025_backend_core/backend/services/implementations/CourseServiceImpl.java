@@ -92,17 +92,17 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     public TopicCompendiumDto updateCompendium(TopicCompendiumDto topicCompendiumDto) {
-        Compendium compendium = compendiumRepository.findById(topicCompendiumDto.getId())
+        Compendium compendium = compendiumRepository.findById(topicCompendiumDto.id())
                 .orElseThrow(() -> new MyBadRequestException(
-                        "Compendium with id '" + topicCompendiumDto.getId() + "' is no exists!"
+                        "Compendium with id '" + topicCompendiumDto.id() + "' is no exists!"
                 ));
 
-        if (topicCompendiumDto.getNotes() != null) compendium.setNotes(topicCompendiumDto.getNotes());
-        if (topicCompendiumDto.getConcepts() != null) {
-            topicCompendiumDto.getConcepts().forEach(conceptDto -> {
+        if (topicCompendiumDto.notes() != null) compendium.setNotes(topicCompendiumDto.notes());
+        if (topicCompendiumDto.concepts() != null) {
+            topicCompendiumDto.concepts().forEach(conceptDto -> {
 
-                Optional<Concept> optionalConcept = (conceptDto.getId() != null ? compendium.getConcepts().stream()
-                    .filter( c -> c.getId() == conceptDto.getId())
+                Optional<Concept> optionalConcept = (conceptDto.id() != null ? compendium.getConcepts().stream()
+                    .filter( c -> c.getId() == conceptDto.id())
                     .findFirst() : Optional.empty());
 
                 Concept concept = optionalConcept.orElseGet(() -> {
@@ -111,8 +111,8 @@ public class CourseServiceImpl implements CourseService {
                     return c;
                 });
 
-                concept.setName(conceptDto.getName());
-                concept.setDescription(conceptDto.getDescription());
+                concept.setName(conceptDto.name());
+                concept.setDescription(conceptDto.description());
 
                 if (optionalConcept.isEmpty())
                     compendium.getConcepts().add(concept);

@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.banew</groupId>
         <artifactId>cw2025_backend</artifactId>
-        <version>0.0.1-SNAPSHOT</version>
+        <version>0.0.2-SNAPSHOT</version>
     </parent>
 
     <artifactId>cw2025_backend_common</artifactId>
