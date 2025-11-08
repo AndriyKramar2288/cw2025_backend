@@ -6,5 +6,6 @@ import java.util.List;
 public record CourseBasicDto (
         Instant startedAt,
         CoursePlanCourseDto coursePlan,
-        List<TopicCompendiumDto> compendiums
+        List<TopicCompendiumDto> compendiums,
+        Long currentCompendiumId
 ) {}

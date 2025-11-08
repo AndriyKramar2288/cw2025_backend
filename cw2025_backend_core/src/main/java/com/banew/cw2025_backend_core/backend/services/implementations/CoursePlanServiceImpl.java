@@ -8,8 +8,11 @@ import com.banew.cw2025_backend_core.backend.repo.CoursePlanRepository;
 import com.banew.cw2025_backend_core.backend.repo.TopicRepository;
 import com.banew.cw2025_backend_core.backend.services.interfaces.CoursePlanService;
 import com.banew.cw2025_backend_core.backend.utils.BasicMapper;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @AllArgsConstructor
@@ -49,5 +52,13 @@ public class CoursePlanServiceImpl implements CoursePlanService {
 
         coursePlanRepository.save(existingPlan);
         return basicMapper.coursePlanToBasicDto(existingPlan);
+    }
+
+    @Override
+    @Transactional
+    public List<CoursePlanBasicDto> getAllExistingPlans() {
+        return coursePlanRepository.findAll().stream()
+                .map(basicMapper::coursePlanToBasicDto)
+                .toList();
     }
 }

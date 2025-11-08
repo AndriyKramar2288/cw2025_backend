@@ -10,6 +10,7 @@ import com.banew.cw2025_backend_core.backend.repo.CourseRepository;
 import com.banew.cw2025_backend_core.backend.repo.TopicRepository;
 import com.banew.cw2025_backend_core.backend.services.interfaces.CourseService;
 import com.banew.cw2025_backend_core.backend.utils.BasicMapper;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -29,6 +30,7 @@ public class CourseServiceImpl implements CourseService {
     private BasicMapper basicMapper;
 
     @Override
+    @Transactional
     public List<CourseBasicDto> getUserCourses(UserProfile currentUser) {
         return courseRepository.findByStudent(currentUser).stream()
                 .map(basicMapper::courseToBasicDto)
@@ -36,12 +38,20 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
+    @Transactional
     public CourseBasicDto beginCourse(Long courseId, UserProfile currentUser) {
 
         var coursePlan = coursePlanRepository.findById(courseId)
              .orElseThrow(() -> new MyBadRequestException(
                      "CoursePlan with id '" + courseId + "' is no exists!"
              ));
+
+        courseRepository.findByStudentAndCoursePlan(currentUser, coursePlan)
+            .ifPresent(course -> {
+                throw new MyBadRequestException(
+                    "For the current user this course is already began!"
+                );
+            });
 
         Course course = new Course();
         course.setStudent(currentUser);
@@ -50,6 +60,7 @@ public class CourseServiceImpl implements CourseService {
         for (int i = 0; i < coursePlan.getTopics().size(); i++) {
             Compendium compendium = new Compendium();
             compendium.setCourse(course);
+            compendium.setNotes("");
             compendium.setTopic(coursePlan.getTopics().get(i));
             compendium.setIndex(i);
             course.getCompendiums().add(compendium);
@@ -61,6 +72,7 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
+    @Transactional
     public TopicCompendiumDto beginTopic(Long topicId, UserProfile currentUser) {
         Topic topic = topicRepository.findById(topicId)
                 .orElseThrow(() -> new MyBadRequestException(
@@ -91,6 +103,7 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
+    @Transactional
     public TopicCompendiumDto updateCompendium(TopicCompendiumDto topicCompendiumDto) {
         Compendium compendium = compendiumRepository.findById(topicCompendiumDto.id())
                 .orElseThrow(() -> new MyBadRequestException(

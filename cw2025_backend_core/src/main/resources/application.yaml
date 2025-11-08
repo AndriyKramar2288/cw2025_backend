@@ -8,24 +8,4 @@ server:
   servlet:
     context-path: /api
 
-secret.decoder_key: ${SECRET_DECODE_KEY}
 token_lifetime: 7
-
----
-
-spring:
-  config:
-    activate:
-      on-profile: dev
-  datasource:
-    username: ${LOCAL_DB_USER}
-    password: ${LOCAL_DB_PASSWORD}
-    url: ${LOCAL_DB_URL}
-    driver-class-name: org.postgresql.Driver
-  jpa:
-    hibernate:
-      ddl-auto: update
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
-

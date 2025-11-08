@@ -3,6 +3,7 @@ package com.banew.cw2025_backend_core.backend.controllers;
 import com.banew.cw2025_backend_common.dto.BasicResult;
 import com.banew.cw2025_backend_common.dto.FieldExceptionResult;
 import com.banew.cw2025_backend_core.backend.exceptions.MyBadRequestException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -44,6 +45,15 @@ public class GlobalExceptionHandler {
     public BasicResult badBody() {
         return new BasicResult(
                 "Bad body format",
+                HttpStatus.BAD_REQUEST.value()
+        );
+    }
+
+    @ResponseStatus(code = HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public BasicResult dbViolationEx(DataIntegrityViolationException exception) {
+        return new BasicResult(
+                "Помилка на етапі зберігання даних в БД. Перевірте валідність даних.",
                 HttpStatus.BAD_REQUEST.value()
         );
     }
