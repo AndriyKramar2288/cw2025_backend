@@ -1,5 +1,6 @@
 package com.banew.cw2025_backend_core.backend.entities;
 
+import com.banew.cw2025_backend_common.dto.courses.CompendiumStatus;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -24,6 +25,7 @@ public class Compendium {
     @ManyToOne
     @JoinColumn(name = "topic_id", nullable = false)
     private Topic topic;
+    public CompendiumStatus status;
     private int index;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "compendium")

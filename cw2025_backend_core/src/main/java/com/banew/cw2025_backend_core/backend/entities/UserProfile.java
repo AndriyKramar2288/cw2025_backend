@@ -20,7 +20,7 @@ public class UserProfile {
     private Long id;
     @Column(length = 64)
     private String username;
-    @Column(length = 64)
+    @Column(length = 255)
     private String password;
     @Column(length = 99, unique = true)
     private String email;

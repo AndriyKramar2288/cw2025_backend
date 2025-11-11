@@ -1,5 +1,6 @@
 package com.banew.cw2025_backend_core;
 
+import com.banew.cw2025_backend_common.dto.courses.CompendiumStatus;
 import com.banew.cw2025_backend_common.dto.courses.CourseBasicDto;
 import com.banew.cw2025_backend_common.dto.courses.TopicCompendiumDto;
 import com.banew.cw2025_backend_core.backend.entities.*;
@@ -253,7 +254,8 @@ class CourseServiceIntegrationTest {
                 compendium.id(),
                 "These are my notes about variables",
                 compendium.topic(),
-                compendium.concepts()
+                compendium.concepts(),
+                CompendiumStatus.LOCKED
         );
 
         TopicCompendiumDto result = courseService.updateCompendium(updateDto);
@@ -289,7 +291,8 @@ class CourseServiceIntegrationTest {
                 compendium.id(),
                 compendium.notes(),
                 compendium.topic(),
-                List.of(concept1, concept2)
+                List.of(concept1, concept2),
+                CompendiumStatus.LOCKED
         );
 
         TopicCompendiumDto result = courseService.updateCompendium(updateDto);
@@ -318,7 +321,8 @@ class CourseServiceIntegrationTest {
                 compendium.id(),
                 compendium.notes(),
                 compendium.topic(),
-                List.of(concept)
+                List.of(concept),
+                CompendiumStatus.LOCKED
         );
 
         TopicCompendiumDto saved = courseService.updateCompendium(updateDto1);
@@ -335,7 +339,8 @@ class CourseServiceIntegrationTest {
                 compendium.id(),
                 compendium.notes(),
                 compendium.topic(),
-                List.of(updatedConcept)
+                List.of(updatedConcept),
+                CompendiumStatus.LOCKED
         );
 
         TopicCompendiumDto result = courseService.updateCompendium(updateDto2);
@@ -351,7 +356,8 @@ class CourseServiceIntegrationTest {
                 999L,
                 "Some notes",
                 null,
-                null
+                null,
+                CompendiumStatus.LOCKED
         );
 
         // When & Then
@@ -374,7 +380,8 @@ class CourseServiceIntegrationTest {
                 compendium.id(),
                 "Original notes",
                 compendium.topic(),
-                compendium.concepts()
+                compendium.concepts(),
+                CompendiumStatus.LOCKED
         );
         courseService.updateCompendium(updateDto1);
 
@@ -383,7 +390,8 @@ class CourseServiceIntegrationTest {
                 compendium.id(),
                 null,
                 compendium.topic(),// явно null
-                compendium.concepts()
+                compendium.concepts(),
+                CompendiumStatus.LOCKED
         );
 
         TopicCompendiumDto result = courseService.updateCompendium(updateDto2);
@@ -410,7 +418,8 @@ class CourseServiceIntegrationTest {
                 compendium1.id(),
                 "Variables notes",
                 compendium1.topic(),
-                compendium1.concepts()
+                compendium1.concepts(),
+                CompendiumStatus.LOCKED
         );
         courseService.updateCompendium(updateDto1);
 
@@ -429,7 +438,8 @@ class CourseServiceIntegrationTest {
                 compendium2.id(),
                 compendium2.notes(),
                 compendium2.topic(),
-                List.of(concept)
+                List.of(concept),
+                CompendiumStatus.LOCKED
         );
         TopicCompendiumDto updated = courseService.updateCompendium(updateDto2);
 

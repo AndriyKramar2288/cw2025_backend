@@ -9,15 +9,17 @@ import java.util.List;
 
 public record CoursePlanBasicDto (
         Long id,
-        @NotBlank String name,
+        @NotBlank @Size(min = 5, max = 255) String name,
         UserProfileBasicDto author,
-        String description,
-        @Size(min = 1) @NotNull List<TopicBasicDto> topics
+        @Size(max = 2048) String description,
+        @Size(min = 1, max = 100) @NotNull List<TopicBasicDto> topics
 ) {
     public record TopicBasicDto (
             Long id,
             @NotBlank
+            @Size(min = 5, max = 255)
             String name,
+            @Size(max = 2048)
             String description
     ) { }
 }

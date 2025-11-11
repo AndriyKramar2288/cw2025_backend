@@ -1,5 +1,6 @@
 package com.banew.cw2025_backend_core.backend.services.implementations;
 
+import com.banew.cw2025_backend_common.dto.courses.CompendiumStatus;
 import com.banew.cw2025_backend_common.dto.courses.CourseBasicDto;
 import com.banew.cw2025_backend_common.dto.courses.TopicCompendiumDto;
 import com.banew.cw2025_backend_core.backend.entities.*;
@@ -63,6 +64,7 @@ public class CourseServiceImpl implements CourseService {
             compendium.setNotes("");
             compendium.setTopic(coursePlan.getTopics().get(i));
             compendium.setIndex(i);
+            compendium.setStatus(i == 0? CompendiumStatus.CAN_START : CompendiumStatus.LOCKED);
             course.getCompendiums().add(compendium);
         }
 
@@ -79,7 +81,13 @@ public class CourseServiceImpl implements CourseService {
                         "CoursePlan with id '" + topicId + "' is no exists!"
                 ));
 
-        Compendium compendium = compendiumRepository.findByTopicAndCourse_Student(topic, currentUser);
+        Compendium compendium = compendiumRepository.findByTopicAndCourse_Student(topic, currentUser)
+                .orElseThrow(() -> new MyBadRequestException(
+                        "There is no compendium for user '"
+                                + currentUser.getUsername()
+                                + "' and topic '" + topic.getName()
+                                + "'!"
+                ));
 
         Long currentCompendiumId = compendium.getCourse().getCurrentCompendiumId();
         Optional<Compendium> currentCompendium = currentCompendiumId != null ?
@@ -97,8 +105,24 @@ public class CourseServiceImpl implements CourseService {
         if (compendium.getIndex() < 0)
             throw new MyBadRequestException("Wrong position of the compendium! < 0");
 
+        compendium.setStatus(CompendiumStatus.CURRENT);
+        compendiumRepository.save(compendium);
+
+        currentCompendium.ifPresent(c -> {
+            c.setStatus(CompendiumStatus.COMPLETED);
+            compendiumRepository.save(c);
+        });
+
+        compendiumRepository
+                .findByIndexAndTopic(compendium.getIndex() + 1, topic)
+                .ifPresent(next -> {
+                    next.setStatus(CompendiumStatus.CAN_START);
+                    compendiumRepository.save(next);
+                });
+
         compendium.getCourse().setCurrentCompendiumId(compendium.getId());
         courseRepository.save(compendium.getCourse());
+
         return basicMapper.compendiumToDto(compendium);
     }
 
@@ -109,6 +133,12 @@ public class CourseServiceImpl implements CourseService {
                 .orElseThrow(() -> new MyBadRequestException(
                         "Compendium with id '" + topicCompendiumDto.id() + "' is no exists!"
                 ));
+
+        if (compendium.getStatus() != CompendiumStatus.CURRENT)
+            throw new MyBadRequestException(
+                "You can't modify this compendium!"
+        );
+
 
         if (topicCompendiumDto.notes() != null) compendium.setNotes(topicCompendiumDto.notes());
         if (topicCompendiumDto.concepts() != null) {
