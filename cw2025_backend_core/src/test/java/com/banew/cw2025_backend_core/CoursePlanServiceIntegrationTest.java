@@ -4,8 +4,7 @@ import com.banew.cw2025_backend_common.dto.coursePlans.CoursePlanBasicDto;
 import com.banew.cw2025_backend_core.backend.entities.CoursePlan;
 import com.banew.cw2025_backend_core.backend.entities.UserProfile;
 import com.banew.cw2025_backend_core.backend.exceptions.MyBadRequestException;
-import com.banew.cw2025_backend_core.backend.repo.CoursePlanRepository;
-import com.banew.cw2025_backend_core.backend.repo.UserProfileRepository;
+import com.banew.cw2025_backend_core.backend.repo.*;
 import com.banew.cw2025_backend_core.backend.services.interfaces.CoursePlanService;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,8 +29,20 @@ class CoursePlanServiceIntegrationTest {
     @Autowired
     private UserProfileRepository userProfileRepository;
 
+    @Autowired
+    private CourseRepository courseRepository;
+
+    @Autowired
+    private TopicRepository topicRepository;
+
+    @Autowired
+    private CompendiumRepository compendiumRepository;
+
     @BeforeEach
     void cleanDB() {
+        compendiumRepository.deleteAll();
+        courseRepository.deleteAll();
+        topicRepository.deleteAll();
         coursePlanRepository.deleteAll();
         userProfileRepository.deleteAll();
     }

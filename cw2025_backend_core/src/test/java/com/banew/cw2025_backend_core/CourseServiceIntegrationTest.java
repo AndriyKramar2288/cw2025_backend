@@ -48,10 +48,10 @@ class CourseServiceIntegrationTest {
 
     @BeforeEach
     void setUp() {
-        topicRepository.deleteAll();
-        courseRepository.deleteAll();
-        coursePlanRepository.deleteAll();
         compendiumRepository.deleteAll();
+        courseRepository.deleteAll();
+        topicRepository.deleteAll();
+        coursePlanRepository.deleteAll();
         userProfileRepository.deleteAll();
 
         // Створюємо тестового користувача
@@ -258,7 +258,7 @@ class CourseServiceIntegrationTest {
                 CompendiumStatus.LOCKED
         );
 
-        TopicCompendiumDto result = courseService.updateCompendium(updateDto, null);
+        TopicCompendiumDto result = courseService.updateCompendium(updateDto, testUser);
 
         // Then
         assertEquals("These are my notes about variables", result.notes());
@@ -295,7 +295,7 @@ class CourseServiceIntegrationTest {
                 CompendiumStatus.LOCKED
         );
 
-        TopicCompendiumDto result = courseService.updateCompendium(updateDto, null);
+        TopicCompendiumDto result = courseService.updateCompendium(updateDto, testUser);
 
         // Then
         assertEquals(2, result.concepts().size());
@@ -325,7 +325,7 @@ class CourseServiceIntegrationTest {
                 CompendiumStatus.LOCKED
         );
 
-        TopicCompendiumDto saved = courseService.updateCompendium(updateDto1, null);
+        TopicCompendiumDto saved = courseService.updateCompendium(updateDto1, testUser);
         Long conceptId = saved.concepts().get(0).id();
 
         // When - оновлюємо існуючий концепт
@@ -343,7 +343,7 @@ class CourseServiceIntegrationTest {
                 CompendiumStatus.LOCKED
         );
 
-        TopicCompendiumDto result = courseService.updateCompendium(updateDto2, null);
+        TopicCompendiumDto result = courseService.updateCompendium(updateDto2, testUser);
 
         // Then
         assertEquals("New description", result.concepts().get(0).description());
@@ -363,7 +363,7 @@ class CourseServiceIntegrationTest {
         // When & Then
         MyBadRequestException exception = assertThrows(
                 MyBadRequestException.class,
-                () -> courseService.updateCompendium(updateDto, null)
+                () -> courseService.updateCompendium(updateDto, testUser)
         );
 
         assertTrue(exception.getMessage().contains("is no exists"));
@@ -383,7 +383,7 @@ class CourseServiceIntegrationTest {
                 compendium.concepts(),
                 CompendiumStatus.LOCKED
         );
-        courseService.updateCompendium(updateDto1, null);
+        courseService.updateCompendium(updateDto1, testUser);
 
         // When - оновлюємо без нотаток
         TopicCompendiumDto updateDto2 = new TopicCompendiumDto(
@@ -394,7 +394,7 @@ class CourseServiceIntegrationTest {
                 CompendiumStatus.LOCKED
         );
 
-        TopicCompendiumDto result = courseService.updateCompendium(updateDto2, null);
+        TopicCompendiumDto result = courseService.updateCompendium(updateDto2, testUser);
 
         // Then - нотатки залишились
         assertEquals("Original notes", result.notes());
@@ -421,7 +421,7 @@ class CourseServiceIntegrationTest {
                 compendium1.concepts(),
                 CompendiumStatus.LOCKED
         );
-        courseService.updateCompendium(updateDto1, null);
+        courseService.updateCompendium(updateDto1, testUser);
 
         // 4. Почати другий топік
         TopicCompendiumDto compendium2 = courseService.beginTopic(topic2.getId(), testUser);
@@ -441,7 +441,7 @@ class CourseServiceIntegrationTest {
                 List.of(concept),
                 CompendiumStatus.LOCKED
         );
-        TopicCompendiumDto updated = courseService.updateCompendium(updateDto2, null);
+        TopicCompendiumDto updated = courseService.updateCompendium(updateDto2, testUser);
 
         assertEquals(1, updated.concepts().size());
 
