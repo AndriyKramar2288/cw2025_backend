@@ -10,5 +10,5 @@ public interface CourseService {
     List<CourseBasicDto> getUserCourses(UserProfile currentUser);
     CourseBasicDto beginCourse(Long courseId, UserProfile currentUser);
     TopicCompendiumDto beginTopic(Long topicId, UserProfile currentUser);
-    TopicCompendiumDto updateCompendium(TopicCompendiumDto topicCompendiumDto);
+    TopicCompendiumDto updateCompendium(TopicCompendiumDto topicCompendiumDto, UserProfile currentUser);
 }

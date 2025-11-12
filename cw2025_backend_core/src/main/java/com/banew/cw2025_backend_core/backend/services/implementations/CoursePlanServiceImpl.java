@@ -10,6 +10,9 @@ import com.banew.cw2025_backend_core.backend.services.interfaces.CoursePlanServi
 import com.banew.cw2025_backend_core.backend.utils.BasicMapper;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -23,6 +26,8 @@ public class CoursePlanServiceImpl implements CoursePlanService {
     private BasicMapper basicMapper;
 
     @Override
+    @CachePut(value = "coursePlans", key = "#result.id")
+    @CacheEvict(value = "userProfileDetailedById", key = "#currentUser.id")
     public CoursePlanBasicDto createCoursePlan(UserProfile currentUser, CoursePlanBasicDto dto) {
         CoursePlan coursePlan = basicMapper.basicDtoToCoursePlan(dto);
         coursePlan.setAuthor(currentUser);
@@ -31,6 +36,8 @@ public class CoursePlanServiceImpl implements CoursePlanService {
     }
 
     @Override
+    @CachePut(value = "coursePlans", key = "#result.id")
+    @CacheEvict(value = "userProfileDetailedById", key = "#currentUser.id")
     public CoursePlanBasicDto updateCoursePlan(UserProfile currentUser, CoursePlanBasicDto dto) {
         CoursePlan existingPlan = coursePlanRepository.findById(dto.id())
                 .orElseThrow(() -> new MyBadRequestException("Course with this ID was not found!"));
@@ -60,5 +67,14 @@ public class CoursePlanServiceImpl implements CoursePlanService {
         return coursePlanRepository.findAll().stream()
                 .map(basicMapper::coursePlanToBasicDto)
                 .toList();
+    }
+
+    @Override
+    @Cacheable(value = "coursePlans", key = "#id")
+    public CoursePlanBasicDto getCoursePlanById(Long id) {
+        return basicMapper.coursePlanToBasicDto(
+                coursePlanRepository.findById(id)
+                        .orElseThrow(() -> new MyBadRequestException("Course with this ID was not found!"))
+        );
     }
 }

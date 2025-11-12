@@ -30,6 +30,11 @@ public class CoursePlanController {
         return coursePlanService.updateCoursePlan(currentUser, dto);
     }
 
+    @GetMapping("/{courseId}")
+    public CoursePlanBasicDto getCoursePlanById(@PathVariable Long courseId) {
+        return coursePlanService.getCoursePlanById(courseId);
+    }
+
     @GetMapping("/")
     public List<CoursePlanBasicDto> getAllExistingPlans() {
         return coursePlanService.getAllExistingPlans();
@@ -41,7 +46,7 @@ public class CoursePlanController {
     }
 
     private static List<CoursePlanBasicDto> exampleCoursePlans() {
-        var author = new UserProfileBasicDto("John", "johndoe@gmail.com", "John Doe");
+        var author = new UserProfileBasicDto(2L, "John", "johndoe@gmail.com", "John Doe");
 
         return List.of(
                 new CoursePlanBasicDto(

@@ -1,16 +1,17 @@
 package com.banew.cw2025_backend_core.backend.services.implementations;
 
-import com.banew.cw2025_backend_common.dto.users.UserLoginForm;
-import com.banew.cw2025_backend_common.dto.users.UserProfileBasicDto;
-import com.banew.cw2025_backend_common.dto.users.UserRegisterForm;
-import com.banew.cw2025_backend_common.dto.users.UserTokenFormResult;
+import com.banew.cw2025_backend_common.dto.users.*;
 import com.banew.cw2025_backend_core.backend.entities.UserProfile;
 import com.banew.cw2025_backend_core.backend.exceptions.MyBadRequestException;
 import com.banew.cw2025_backend_core.backend.repo.UserProfileRepository;
 import com.banew.cw2025_backend_core.backend.services.interfaces.JwtService;
 import com.banew.cw2025_backend_core.backend.services.interfaces.UserProfileService;
 import com.banew.cw2025_backend_core.backend.utils.BasicMapper;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -38,17 +39,34 @@ public class UserProfileServiceImpl implements UserProfileService {
                     .orElseThrow(() -> new BadCredentialsException("Getted jwt has no subject!")));
 
             UserProfile foundUser = getUserById(userId)
-                    .orElseThrow(() -> new BadCredentialsException("User with id " + getJwt.getSubject() + " is not found!"));
+                    .orElseThrow(() -> new BadCredentialsException("User with id " + getJwt.getSubject() + " was not found!"));
             return new UsernamePasswordAuthenticationToken(foundUser, getJwt, foundUser.getAuthorities());
         };
     }
 
     @Override
+    @Cacheable(value = "userProfileById", key = "#userId")
     public Optional<UserProfile> getUserById(Long userId) {
         return userProfileRepository.findById(userId);
     }
 
     @Override
+    @Transactional
+    @Cacheable(value = "userProfileDetailedById", key = "#userId")
+    public UserProfileDetailedDto getUserProfileDetailedById(Long userId) {
+        var user = userProfileRepository.findById(userId)
+                .orElseThrow(() -> new MyBadRequestException(
+                        "User with id " + userId + " was not found!"
+                ));
+
+        return basicMapper.userProfileToDetailedDto(user);
+    }
+
+    @Override
+    @Caching(evict = {
+            @CacheEvict(value = "userProfileById", key = "#previousProfile.id"),
+            @CacheEvict(value = "userProfileDetailedById", key = "#previousProfile.id")
+    })
     public UserProfileBasicDto updateUser(UserProfileBasicDto dto, UserProfile previousProfile) {
 
         if (dto.email() != null) previousProfile.setEmail(dto.email());

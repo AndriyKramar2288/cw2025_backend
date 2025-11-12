@@ -4,6 +4,8 @@ import com.banew.cw2025_backend_common.dto.courses.CourseBasicDto;
 import com.banew.cw2025_backend_common.dto.coursePlans.CoursePlanBasicDto;
 import com.banew.cw2025_backend_common.dto.courses.TopicCompendiumDto;
 import com.banew.cw2025_backend_common.dto.users.UserProfileBasicDto;
+import com.banew.cw2025_backend_common.dto.users.UserProfileCoursePlanDto;
+import com.banew.cw2025_backend_common.dto.users.UserProfileDetailedDto;
 import com.banew.cw2025_backend_common.dto.users.UserRegisterForm;
 import com.banew.cw2025_backend_core.backend.entities.*;
 import org.mapstruct.AfterMapping;
@@ -18,6 +20,9 @@ public interface BasicMapper {
     UserProfileBasicDto userProfileToBasicDto(UserProfile userProfile);
     UserProfile basicDtoToUserProfile(UserProfileBasicDto dto);
     UserProfile registerFormToUserProfile(UserRegisterForm userRegisterForm);
+
+    UserProfileCoursePlanDto coursePlanToUserProfileDetailedDto(CoursePlan coursePlan);
+    UserProfileDetailedDto userProfileToDetailedDto(UserProfile userProfile);
 
     CoursePlan basicDtoToCoursePlan(CoursePlanBasicDto dto);
     Topic basicDtoToTopic(CoursePlanBasicDto.TopicBasicDto dto);

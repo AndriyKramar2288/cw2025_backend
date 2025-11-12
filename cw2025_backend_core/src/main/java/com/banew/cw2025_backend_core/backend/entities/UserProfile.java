@@ -28,6 +28,8 @@ public class UserProfile {
     private String photoSrc;
     @Column(length = 64)
     private List<String> roles;
+    @OneToMany(mappedBy = "author",cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CoursePlan> coursePlans;
 
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return roles.stream().map((e) -> new SimpleGrantedAuthority("ROLE_" + e)).toList();

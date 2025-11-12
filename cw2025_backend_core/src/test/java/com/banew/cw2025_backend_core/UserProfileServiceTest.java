@@ -225,7 +225,7 @@ public class UserProfileServiceTest {
         existingUser.setUsername("Old Name");
         existingUser.setPhotoSrc("old-photo.jpg");
 
-        UserProfileBasicDto updateDto = new UserProfileBasicDto("new@test.com", "New Name", null);
+        UserProfileBasicDto updateDto = new UserProfileBasicDto(1L, "new@test.com", "New Name", null);
 
         when(userProfileRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -248,7 +248,7 @@ public class UserProfileServiceTest {
         existingUser.setPhotoSrc("old-photo.jpg");
 
         UserProfileBasicDto updateDto = new UserProfileBasicDto(
-                "New Name", null, null
+                1L, "New Name", null, null
         );
         // email and photoSrc are null
 

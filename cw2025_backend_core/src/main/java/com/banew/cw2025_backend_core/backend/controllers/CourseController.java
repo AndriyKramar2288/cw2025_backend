@@ -35,7 +35,8 @@ public class CourseController {
     }
 
     @PutMapping("/topic/")
-    public TopicCompendiumDto updateCompendium(@RequestBody TopicCompendiumDto topicCompendiumDto) {
-        return courseService.updateCompendium(topicCompendiumDto);
+    public TopicCompendiumDto updateCompendium(@RequestBody TopicCompendiumDto topicCompendiumDto,
+                                               @AuthenticationPrincipal UserProfile currentUser) {
+        return courseService.updateCompendium(topicCompendiumDto, currentUser);
     }
 }

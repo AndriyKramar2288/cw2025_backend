@@ -13,6 +13,9 @@ import com.banew.cw2025_backend_core.backend.services.interfaces.CourseService;
 import com.banew.cw2025_backend_core.backend.utils.BasicMapper;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -32,6 +35,7 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     @Transactional
+    @Cacheable(value = "courses", key = "#currentUser.id")
     public List<CourseBasicDto> getUserCourses(UserProfile currentUser) {
         return courseRepository.findByStudent(currentUser).stream()
                 .map(basicMapper::courseToBasicDto)
@@ -40,6 +44,7 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "courses", key = "#currentUser.id")
     public CourseBasicDto beginCourse(Long courseId, UserProfile currentUser) {
 
         var coursePlan = coursePlanRepository.findById(courseId)
@@ -75,6 +80,7 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "courses", key = "#currentUser.id")
     public TopicCompendiumDto beginTopic(Long topicId, UserProfile currentUser) {
         Topic topic = topicRepository.findById(topicId)
                 .orElseThrow(() -> new MyBadRequestException(
@@ -128,7 +134,8 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     @Transactional
-    public TopicCompendiumDto updateCompendium(TopicCompendiumDto topicCompendiumDto) {
+    @CacheEvict(value = "courses", key = "#currentUser.id")
+    public TopicCompendiumDto updateCompendium(TopicCompendiumDto topicCompendiumDto, UserProfile currentUser) {
         Compendium compendium = compendiumRepository.findById(topicCompendiumDto.id())
                 .orElseThrow(() -> new MyBadRequestException(
                         "Compendium with id '" + topicCompendiumDto.id() + "' is no exists!"
@@ -138,7 +145,6 @@ public class CourseServiceImpl implements CourseService {
             throw new MyBadRequestException(
                 "You can't modify this compendium!"
         );
-
 
         if (topicCompendiumDto.notes() != null) compendium.setNotes(topicCompendiumDto.notes());
         if (topicCompendiumDto.concepts() != null) {
