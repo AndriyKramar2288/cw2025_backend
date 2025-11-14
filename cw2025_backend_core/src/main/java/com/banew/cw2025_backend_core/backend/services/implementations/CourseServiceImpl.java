@@ -169,7 +169,8 @@ public class CourseServiceImpl implements CourseService {
 
             compendium.getConcepts()
                     .removeIf(c -> topicCompendiumDto.concepts().stream()
-                            .noneMatch(dto -> Long.valueOf(c.getId()).equals(dto.id()))
+                            .noneMatch(dto ->
+                                    dto.id() == null || Long.valueOf(c.getId()).equals(dto.id()))
                     );
         }
 
