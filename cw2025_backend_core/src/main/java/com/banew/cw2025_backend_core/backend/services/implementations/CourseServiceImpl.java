@@ -166,7 +166,12 @@ public class CourseServiceImpl implements CourseService {
                 if (optionalConcept.isEmpty())
                     compendium.getConcepts().add(concept);
             });
-        };
+
+            compendium.getConcepts()
+                    .removeIf(c -> topicCompendiumDto.concepts().stream()
+                            .noneMatch(dto -> Long.valueOf(c.getId()).equals(dto.id()))
+                    );
+        }
 
         compendiumRepository.save(compendium);
         return basicMapper.compendiumToDto(compendium);
