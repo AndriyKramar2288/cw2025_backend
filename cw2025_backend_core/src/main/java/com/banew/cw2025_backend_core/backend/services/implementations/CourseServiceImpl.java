@@ -6,10 +6,7 @@ import com.banew.cw2025_backend_common.dto.courses.CourseDetailedDto;
 import com.banew.cw2025_backend_common.dto.courses.TopicCompendiumDto;
 import com.banew.cw2025_backend_core.backend.entities.*;
 import com.banew.cw2025_backend_core.backend.exceptions.MyBadRequestException;
-import com.banew.cw2025_backend_core.backend.repo.CompendiumRepository;
-import com.banew.cw2025_backend_core.backend.repo.CoursePlanRepository;
-import com.banew.cw2025_backend_core.backend.repo.CourseRepository;
-import com.banew.cw2025_backend_core.backend.repo.TopicRepository;
+import com.banew.cw2025_backend_core.backend.repo.*;
 import com.banew.cw2025_backend_core.backend.services.interfaces.CourseService;
 import com.banew.cw2025_backend_core.backend.utils.BasicMapper;
 import jakarta.transaction.Transactional;
@@ -32,6 +29,7 @@ public class CourseServiceImpl implements CourseService {
     private TopicRepository topicRepository;
     private CoursePlanRepository coursePlanRepository;
     private CourseRepository courseRepository;
+    private ConceptRepository conceptRepository;
     private CompendiumRepository compendiumRepository;
     private BasicMapper basicMapper;
 
@@ -40,7 +38,7 @@ public class CourseServiceImpl implements CourseService {
     @Cacheable(value = "courses", key = "#currentUser.id")
     public List<CourseBasicDto> getUserCourses(UserProfile currentUser) {
         return courseRepository.findByStudent(currentUser).stream()
-                .map(basicMapper::courseToBasicDto)
+                .map(o -> basicMapper.courseToBasicDto(o, compendiumRepository, conceptRepository))
                 .collect(Collectors.toList());
     }
 
@@ -101,7 +99,7 @@ public class CourseServiceImpl implements CourseService {
 
         courseRepository.save(course);
 
-        return basicMapper.courseToBasicDto(course);
+        return basicMapper.courseToBasicDto(course, compendiumRepository, conceptRepository);
     }
 
     @Override
@@ -188,9 +186,8 @@ public class CourseServiceImpl implements CourseService {
         if (topicCompendiumDto.concepts() != null) {
             topicCompendiumDto.concepts().forEach(conceptDto -> {
 
-                Optional<Concept> optionalConcept = (conceptDto.id() != null ? compendium.getConcepts().stream()
-                    .filter( c -> c.getId() == conceptDto.id())
-                    .findFirst() : Optional.empty());
+                Optional<Concept> optionalConcept = (conceptDto.id() != null ?
+                        conceptRepository.findById(conceptDto.id()) : Optional.empty());
 
                 Concept concept = optionalConcept.orElseGet(() -> {
                     Concept c = new Concept();
@@ -217,10 +214,10 @@ public class CourseServiceImpl implements CourseService {
     }
 
     public TopicCompendiumDto beginTopic(Long topicId, UserProfile currentUser) {
-        return beginTopic(topicId, currentUser, null);
+        return beginTopic(topicId, currentUser, 1488L);
     }
 
     public TopicCompendiumDto updateCompendium(TopicCompendiumDto topicCompendiumDto, UserProfile currentUser) {
-        return updateCompendium(topicCompendiumDto, currentUser, null);
+        return updateCompendium(topicCompendiumDto, currentUser, 1488L);
     }
 }

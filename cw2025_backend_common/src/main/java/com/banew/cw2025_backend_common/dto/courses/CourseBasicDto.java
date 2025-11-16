@@ -6,5 +6,7 @@ public record CourseBasicDto (
         Long id,
         Instant startedAt,
         CoursePlanCourseDto coursePlan,
-        Long currentCompendiumId
+        String currentTopic,
+        Long totalConcepts,
+        Long totalTopics
 ) {}

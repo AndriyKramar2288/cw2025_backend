@@ -1,14 +1,17 @@
 package com.banew.cw2025_backend_core.backend.utils;
 
-import com.banew.cw2025_backend_common.dto.courses.CourseBasicDto;
 import com.banew.cw2025_backend_common.dto.coursePlans.CoursePlanBasicDto;
+import com.banew.cw2025_backend_common.dto.courses.CourseBasicDto;
 import com.banew.cw2025_backend_common.dto.courses.CourseDetailedDto;
+import com.banew.cw2025_backend_common.dto.courses.CoursePlanCourseDto;
 import com.banew.cw2025_backend_common.dto.courses.TopicCompendiumDto;
 import com.banew.cw2025_backend_common.dto.users.UserProfileBasicDto;
 import com.banew.cw2025_backend_common.dto.users.UserProfileCoursePlanDto;
 import com.banew.cw2025_backend_common.dto.users.UserProfileDetailedDto;
 import com.banew.cw2025_backend_common.dto.users.UserRegisterForm;
 import com.banew.cw2025_backend_core.backend.entities.*;
+import com.banew.cw2025_backend_core.backend.repo.CompendiumRepository;
+import com.banew.cw2025_backend_core.backend.repo.ConceptRepository;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;
@@ -31,10 +34,24 @@ public interface BasicMapper {
     CoursePlanBasicDto coursePlanToBasicDto(CoursePlan coursePlan);
     CoursePlanBasicDto.TopicBasicDto topicToBasicDto(Topic topic);
 
+    CoursePlanCourseDto coursePlanToCourseDto(CoursePlan coursePlan);
     TopicCompendiumDto compendiumToDto(Compendium compendium);
-    CourseBasicDto courseToBasicDto(Course course);
     CourseDetailedDto courseToDetailedDto(Course course);
     TopicCompendiumDto.ConceptBasicDto conceptToDto(Concept concept);
+
+    default CourseBasicDto courseToBasicDto(Course course,
+                                            CompendiumRepository compendiumRepository,
+                                            ConceptRepository conceptRepository) {
+        Compendium compendium = compendiumRepository
+                .findById(course.getCurrentCompendiumId()).orElseThrow();
+
+        return new CourseBasicDto(
+                course.getId(), course.getStartedAt(), coursePlanToCourseDto(course.getCoursePlan()),
+                compendium.getTopic().getName(),
+                conceptRepository.countByCompendium_Course(course),
+                compendiumRepository.countByCourse(course)
+        );
+    }
 
     @AfterMapping
     default void linkTopics(@MappingTarget CoursePlan coursePlan) {
