@@ -17,6 +17,8 @@ import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.factory.Mappers;
 
+import java.util.Optional;
+
 @Mapper(componentModel = "spring")
 public interface BasicMapper {
     BasicMapper INSTANCE = Mappers.getMapper(BasicMapper.class);
@@ -42,12 +44,17 @@ public interface BasicMapper {
     default CourseBasicDto courseToBasicDto(Course course,
                                             CompendiumRepository compendiumRepository,
                                             ConceptRepository conceptRepository) {
-        Compendium compendium = compendiumRepository
-                .findById(course.getCurrentCompendiumId()).orElseThrow();
+        Optional<Compendium> compendium = course.getCurrentCompendiumId() != null?
+                compendiumRepository.findById(course.getCurrentCompendiumId()) :
+                Optional.empty();
+
+        String topicName = compendium.stream()
+                .map(c -> c.getTopic().getName())
+                .findFirst().orElse(null);
 
         return new CourseBasicDto(
                 course.getId(), course.getStartedAt(), coursePlanToCourseDto(course.getCoursePlan()),
-                compendium.getTopic().getName(),
+                topicName,
                 conceptRepository.countByCompendium_Course(course),
                 compendiumRepository.countByCourse(course)
         );
