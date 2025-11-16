@@ -145,6 +145,13 @@ public class CourseServiceImpl implements CourseService {
 
         currentCompendium.ifPresent(c -> {
             c.setStatus(CompendiumStatus.COMPLETED);
+            c.getConcepts().forEach(concept -> {
+                if (concept.getIsFlashCard()) {
+                    FlashCard flashCard = new FlashCard();
+                    flashCard.setConcept(concept);
+                    concept.setFlashCard(flashCard);
+                }
+            });
             compendiumRepository.save(c);
         });
 
@@ -197,6 +204,7 @@ public class CourseServiceImpl implements CourseService {
 
                 concept.setName(conceptDto.name());
                 concept.setDescription(conceptDto.description());
+                concept.setIsFlashCard(conceptDto.isFlashCard());
 
                 if (optionalConcept.isEmpty())
                     compendium.getConcepts().add(concept);

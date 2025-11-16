@@ -243,13 +243,13 @@ class CourseServiceIntegrationTest {
         var concept1 = new TopicCompendiumDto.ConceptBasicDto(
                 null,
                 "int",
-                "Integer data type"
+                "Integer data type", false
         );
 
         var concept2 = new TopicCompendiumDto.ConceptBasicDto(
                 null,
                 "String",
-                "Text data type"
+                "Text data type", false
         );
 
         TopicCompendiumDto updateDto = new TopicCompendiumDto(
@@ -279,7 +279,7 @@ class CourseServiceIntegrationTest {
         var concept = new TopicCompendiumDto.ConceptBasicDto(
                 null,
                 "int",
-                "Old description"
+                "Old description", false
         );
 
         TopicCompendiumDto updateDto1 = new TopicCompendiumDto(
@@ -297,7 +297,7 @@ class CourseServiceIntegrationTest {
         var updatedConcept = new TopicCompendiumDto.ConceptBasicDto(
                 conceptId,
                 "int",
-                "New description"
+                "New description", false
         );
 
         TopicCompendiumDto updateDto2 = new TopicCompendiumDto(
