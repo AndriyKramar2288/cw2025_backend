@@ -2,6 +2,7 @@ package com.banew.cw2025_backend_core.backend.utils;
 
 import com.banew.cw2025_backend_common.dto.courses.CourseBasicDto;
 import com.banew.cw2025_backend_common.dto.coursePlans.CoursePlanBasicDto;
+import com.banew.cw2025_backend_common.dto.courses.CourseDetailedDto;
 import com.banew.cw2025_backend_common.dto.courses.TopicCompendiumDto;
 import com.banew.cw2025_backend_common.dto.users.UserProfileBasicDto;
 import com.banew.cw2025_backend_common.dto.users.UserProfileCoursePlanDto;
@@ -32,6 +33,7 @@ public interface BasicMapper {
 
     TopicCompendiumDto compendiumToDto(Compendium compendium);
     CourseBasicDto courseToBasicDto(Course course);
+    CourseDetailedDto courseToDetailedDto(Course course);
     TopicCompendiumDto.ConceptBasicDto conceptToDto(Concept concept);
 
     @AfterMapping

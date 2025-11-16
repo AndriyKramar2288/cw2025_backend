@@ -1,6 +1,7 @@
 package com.banew.cw2025_backend_core.backend.controllers;
 
 import com.banew.cw2025_backend_common.dto.courses.CourseBasicDto;
+import com.banew.cw2025_backend_common.dto.courses.CourseDetailedDto;
 import com.banew.cw2025_backend_common.dto.courses.TopicCompendiumDto;
 import com.banew.cw2025_backend_core.backend.entities.UserProfile;
 import com.banew.cw2025_backend_core.backend.services.interfaces.CourseService;
@@ -22,21 +23,29 @@ public class CourseController {
         return courseService.getUserCourses(currentUser);
     }
 
+    @GetMapping("/by-plan/{courseId}")
+    public CourseDetailedDto getUserCourseById(@PathVariable(name = "courseId") Long courseId,
+                                               @AuthenticationPrincipal UserProfile currentUser) {
+        return courseService.getCourseById(currentUser, courseId);
+    }
+
     @PostMapping("/by-plan/{courseId}/start")
     public CourseBasicDto beginCourse(@PathVariable(name = "courseId") Long courseId,
                                       @AuthenticationPrincipal UserProfile currentUser) {
         return courseService.beginCourse(courseId, currentUser);
     }
 
-    @PostMapping("/topic/{topicId}/start")
-    public TopicCompendiumDto beginTopic(@PathVariable(name = "topicId") Long topicId,
+    @PostMapping("/by-plan/{courseId}/topic/{topicId}/start")
+    public TopicCompendiumDto beginTopic(@PathVariable(name = "courseId") Long courseId,
+                                         @PathVariable(name = "topicId") Long topicId,
                                          @AuthenticationPrincipal UserProfile currentUser) {
-        return courseService.beginTopic(topicId, currentUser);
+        return courseService.beginTopic(topicId, currentUser, courseId);
     }
 
-    @PutMapping("/topic/")
+    @PutMapping("/by-plan/{courseId}/topic")
     public TopicCompendiumDto updateCompendium(@RequestBody TopicCompendiumDto topicCompendiumDto,
+                                               @PathVariable(name = "courseId") Long courseId,
                                                @AuthenticationPrincipal UserProfile currentUser) {
-        return courseService.updateCompendium(topicCompendiumDto, currentUser);
+        return courseService.updateCompendium(topicCompendiumDto, currentUser, courseId);
     }
 }

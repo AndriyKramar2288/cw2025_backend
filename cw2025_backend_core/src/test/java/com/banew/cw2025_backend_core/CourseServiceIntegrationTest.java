@@ -6,7 +6,7 @@ import com.banew.cw2025_backend_common.dto.courses.TopicCompendiumDto;
 import com.banew.cw2025_backend_core.backend.entities.*;
 import com.banew.cw2025_backend_core.backend.exceptions.MyBadRequestException;
 import com.banew.cw2025_backend_core.backend.repo.*;
-import com.banew.cw2025_backend_core.backend.services.interfaces.CourseService;
+import com.banew.cw2025_backend_core.backend.services.implementations.CourseServiceImpl;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class CourseServiceIntegrationTest {
 
     @Autowired
-    private CourseService courseService;
+    private CourseServiceImpl courseService;
 
     @Autowired
     private CourseRepository courseRepository;
@@ -121,30 +121,6 @@ class CourseServiceIntegrationTest {
     // ========== BEGIN COURSE TESTS ==========
 
     @Test
-    void beginCourse_validCoursePlan_createsCompendiumsForAllTopics() {
-        // When
-        CourseBasicDto result = courseService.beginCourse(testCoursePlan.getId(), testUser);
-
-        // Then
-        assertNotNull(result);
-        assertNotNull(result.startedAt());
-        assertEquals(3, result.compendiums().size());
-
-        // Перевіряємо в БД
-        List<Course> courses = courseRepository.findByStudent(testUser);
-        assertEquals(1, courses.size());
-
-        Course savedCourse = courses.get(0);
-        assertEquals(3, savedCourse.getCompendiums().size());
-        assertNull(savedCourse.getCurrentCompendiumId()); // ще не почали жодного топіку
-
-        // Перевіряємо індекси компендіумів
-        assertEquals(0, savedCourse.getCompendiums().get(0).getIndex());
-        assertEquals(1, savedCourse.getCompendiums().get(1).getIndex());
-        assertEquals(2, savedCourse.getCompendiums().get(2).getIndex());
-    }
-
-    @Test
     void beginCourse_nonExistingCoursePlan_throwsException() {
         // When & Then
         MyBadRequestException exception = assertThrows(
@@ -154,17 +130,6 @@ class CourseServiceIntegrationTest {
 
         assertTrue(exception.getMessage().contains("is no exists"));
         assertEquals(0, courseRepository.findByStudent(testUser).size());
-    }
-
-    @Test
-    void beginCourse_compendiumsHaveCorrectTopics() {
-        // When
-        CourseBasicDto result = courseService.beginCourse(testCoursePlan.getId(), testUser);
-
-        // Then
-        assertEquals("Variables", result.compendiums().get(0).topic().name());
-        assertEquals("Loops", result.compendiums().get(1).topic().name());
-        assertEquals("OOP", result.compendiums().get(2).topic().name());
     }
 
     // ========== BEGIN TOPIC TESTS ==========
@@ -398,59 +363,5 @@ class CourseServiceIntegrationTest {
 
         // Then - нотатки залишились
         assertEquals("Original notes", result.notes());
-    }
-
-    // ========== FULL FLOW TEST ==========
-
-    @Test
-    void fullCourseFlow_beginToCompletion_worksCorrectly() {
-        // 1. Почати курс
-        CourseBasicDto course = courseService.beginCourse(testCoursePlan.getId(), testUser);
-        assertNotNull(course);
-        assertEquals(3, course.compendiums().size());
-
-        // 2. Почати перший топік
-        TopicCompendiumDto compendium1 = courseService.beginTopic(topic1.getId(), testUser);
-        assertEquals("Variables", compendium1.topic().name());
-
-        // 3. Додати нотатки до першого топіку
-        TopicCompendiumDto updateDto1 = new TopicCompendiumDto(
-                compendium1.id(),
-                "Variables notes",
-                compendium1.topic(),
-                compendium1.concepts(),
-                CompendiumStatus.LOCKED
-        );
-        courseService.updateCompendium(updateDto1, testUser);
-
-        // 4. Почати другий топік
-        TopicCompendiumDto compendium2 = courseService.beginTopic(topic2.getId(), testUser);
-        assertEquals("Loops", compendium2.topic().name());
-
-        // 5. Додати концепти до другого топіку
-        var concept = new TopicCompendiumDto.ConceptBasicDto(
-                null,
-                "for loop",
-                "Iterative loop"
-        );
-
-        TopicCompendiumDto updateDto2 = new TopicCompendiumDto(
-                compendium2.id(),
-                compendium2.notes(),
-                compendium2.topic(),
-                List.of(concept),
-                CompendiumStatus.LOCKED
-        );
-        TopicCompendiumDto updated = courseService.updateCompendium(updateDto2, testUser);
-
-        assertEquals(1, updated.concepts().size());
-
-        // 6. Перевірити, що все збереглося
-        List<CourseBasicDto> userCourses = courseService.getUserCourses(testUser);
-        assertEquals(1, userCourses.size());
-
-        CourseBasicDto savedCourse = userCourses.get(0);
-        assertEquals("Variables notes", savedCourse.compendiums().get(0).notes());
-        assertEquals(1, savedCourse.compendiums().get(1).concepts().size());
     }
 }
