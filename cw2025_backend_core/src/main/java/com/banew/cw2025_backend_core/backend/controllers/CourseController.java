@@ -35,6 +35,12 @@ public class CourseController {
         return courseService.beginCourse(courseId, currentUser);
     }
 
+    @PostMapping("/by-plan/{courseId}/end")
+    public CourseDetailedDto endCourse(@PathVariable(name = "courseId") Long courseId,
+                                      @AuthenticationPrincipal UserProfile currentUser) {
+        return courseService.endCourse(courseId, currentUser);
+    }
+
     @PostMapping("/by-plan/{courseId}/topic/{topicId}/start")
     public TopicCompendiumDto beginTopic(@PathVariable(name = "courseId") Long courseId,
                                          @PathVariable(name = "topicId") Long topicId,

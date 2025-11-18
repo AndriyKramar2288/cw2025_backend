@@ -110,6 +110,47 @@ public class CourseServiceImpl implements CourseService {
                     @CacheEvict(value = "courseById", key = "#courseId + '_' + #currentUser.id")
             }
     )
+    public CourseDetailedDto endCourse(Long courseId, UserProfile currentUser) {
+
+        CoursePlan coursePlan = coursePlanRepository.findById(courseId)
+                .orElseThrow(() -> new MyBadRequestException(
+                        "Course-plan with id '" + courseId + "' is no exists!"
+                ));
+
+        Course course = courseRepository.findByStudentAndCoursePlan(currentUser, coursePlan)
+                .orElseThrow(() -> new MyBadRequestException(
+                        "There is no compendium for user '"
+                                + currentUser.getUsername()
+                                + "' and coursePlan '" + coursePlan.getName()
+                                + "'!"
+                ));
+
+        var currentCompendiumId = course.getCurrentCompendiumId();
+        if (currentCompendiumId == null)
+            throw new MyBadRequestException(
+                    "This course isn't started or already ended!"
+            );
+
+        var currentCompendium = compendiumRepository.findById(currentCompendiumId)
+                .orElseThrow(() -> new MyBadRequestException(
+                        "Compendium with id '" + currentCompendiumId + "' is no exists!"
+                ));
+
+        course.setCurrentCompendiumId(null);
+        endTopic(currentCompendium);
+        courseRepository.save(course);
+
+        return basicMapper.courseToDetailedDto(course);
+    }
+
+    @Override
+    @Transactional
+    @Caching(
+            evict = {
+                    @CacheEvict(value = "courses", key = "#currentUser.id"),
+                    @CacheEvict(value = "courseById", key = "#courseId + '_' + #currentUser.id")
+            }
+    )
     public TopicCompendiumDto beginTopic(Long topicId, UserProfile currentUser, Long courseId) {
         Topic topic = topicRepository.findById(topicId)
                 .orElseThrow(() -> new MyBadRequestException(
@@ -123,6 +164,9 @@ public class CourseServiceImpl implements CourseService {
                                 + "' and topic '" + topic.getName()
                                 + "'!"
                 ));
+
+        if (compendium.getStatus() != CompendiumStatus.LOCKED && compendium.getStatus() != CompendiumStatus.CAN_START)
+            throw new MyBadRequestException("You can't begin this topic!");
 
         Long currentCompendiumId = compendium.getCourse().getCurrentCompendiumId();
         Optional<Compendium> currentCompendium = currentCompendiumId != null ?
@@ -143,17 +187,7 @@ public class CourseServiceImpl implements CourseService {
         compendium.setStatus(CompendiumStatus.CURRENT);
         compendiumRepository.save(compendium);
 
-        currentCompendium.ifPresent(c -> {
-            c.setStatus(CompendiumStatus.COMPLETED);
-            c.getConcepts().forEach(concept -> {
-                if (concept.getIsFlashCard()) {
-                    FlashCard flashCard = new FlashCard();
-                    flashCard.setConcept(concept);
-                    concept.setFlashCard(flashCard);
-                }
-            });
-            compendiumRepository.save(c);
-        });
+        currentCompendium.ifPresent(this::endTopic);
 
         compendiumRepository
                 .findByIndexAndTopic(compendium.getIndex() + 1, topic)
@@ -221,6 +255,18 @@ public class CourseServiceImpl implements CourseService {
 
         compendiumRepository.save(compendium);
         return basicMapper.compendiumToDto(compendium);
+    }
+
+    private void endTopic(Compendium c) {
+        c.setStatus(CompendiumStatus.COMPLETED);
+        c.getConcepts().forEach(concept -> {
+            if (concept.getIsFlashCard()) {
+                FlashCard flashCard = new FlashCard();
+                flashCard.setConcept(concept);
+                concept.setFlashCard(flashCard);
+            }
+        });
+        compendiumRepository.save(c);
     }
 
     public TopicCompendiumDto beginTopic(Long topicId, UserProfile currentUser) {
