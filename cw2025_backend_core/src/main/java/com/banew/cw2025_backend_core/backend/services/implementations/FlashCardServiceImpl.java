@@ -4,14 +4,20 @@ import com.banew.cw2025_backend_common.dto.cards.FlashCardAnswer;
 import com.banew.cw2025_backend_common.dto.cards.FlashCardBasicDto;
 import com.banew.cw2025_backend_common.dto.cards.FlashCardDayStats;
 import com.banew.cw2025_backend_common.dto.cards.FlashCardType;
+import com.banew.cw2025_backend_common.dto.courses.TopicCompendiumDto;
+import com.banew.cw2025_backend_core.backend.entities.Concept;
 import com.banew.cw2025_backend_core.backend.entities.FlashCard;
 import com.banew.cw2025_backend_core.backend.entities.UserProfile;
 import com.banew.cw2025_backend_core.backend.exceptions.MyBadRequestException;
+import com.banew.cw2025_backend_core.backend.repo.ConceptRepository;
 import com.banew.cw2025_backend_core.backend.repo.FlashCardRepository;
 import com.banew.cw2025_backend_core.backend.services.interfaces.FlashCardService;
 import com.banew.cw2025_backend_core.backend.utils.BasicMapper;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -28,21 +34,46 @@ import java.util.stream.IntStream;
 public class FlashCardServiceImpl implements FlashCardService {
 
     private FlashCardRepository flashCardRepository;
+    private ConceptRepository conceptRepository;
     private BasicMapper basicMapper;
 
     @Override
     @Transactional
+    @Cacheable(value = "flashCardsByUserId", key = "#currentUser.id")
     public List<FlashCardBasicDto> getCards(UserProfile currentUser) {
         return flashCardRepository.availableCards(currentUser, Instant.now()).stream()
-                .map(card -> fromFlashCard(card, null))
+                .map(card -> flashCardBasicDto(card, null))
                 .toList();
     }
 
     @Override
     @Transactional
+    public FlashCardBasicDto updateConcept(UserProfile currentUser, Long flashCardId, TopicCompendiumDto.ConceptBasicDto newConcept) {
+        FlashCard flashCard = flashCardRepository.findByIdAndStudent(flashCardId, currentUser)
+                .orElseThrow(() -> new MyBadRequestException(
+                        "Card with id '" + flashCardId + "' is no exists!"
+                ));
+
+        Concept concept = flashCard.getConcept();
+
+        if (newConcept.name() != null) concept.setName(newConcept.name());
+        if (newConcept.description() != null) concept.setDescription(newConcept.description());
+        conceptRepository.save(concept);
+
+        return flashCardBasicDto(flashCard, null);
+    }
+
+    @Override
+    @Transactional
+    @Caching(
+            evict = {
+                    @CacheEvict(value = "flashCardStatsByUserId", key = "#currentUser.id"),
+                    @CacheEvict(value = "flashCardsByUserId", key = "#currentUser.id")
+            }
+    )
     public FlashCardBasicDto answer(FlashCardAnswer answer, UserProfile currentUser, Long flashCardId) {
 
-        FlashCard flashCard = flashCardRepository.findById(flashCardId)
+        FlashCard flashCard = flashCardRepository.findByIdAndStudent(flashCardId, currentUser)
                 .orElseThrow(() -> new MyBadRequestException(
                         "Card with id '" + flashCardId + "' is no exists!"
                 ));
@@ -53,11 +84,12 @@ public class FlashCardServiceImpl implements FlashCardService {
             );
         }
 
-        return fromFlashCard(flashCard, answer);
+        return flashCardBasicDto(flashCard, answer);
     }
 
     @Override
     @Transactional
+    @Cacheable(value = "flashCardStatsByUserId", key = "#currentUser.id")
     public FlashCardDayStats getDayStats(UserProfile currentUser) {
 
         List<FlashCard> todayCards = flashCardRepository
@@ -68,7 +100,7 @@ public class FlashCardServiceImpl implements FlashCardService {
         List<Duration> durations = IntStream.range(0, todayCards.size() - 1)
                 .mapToObj(i -> Duration.between(
                         todayCards.get(i).getLastReview(),
-                        todayCards.get(i + 1).getLastReview()))
+                        todayCards.get(i + 1).getLastReview()).abs())
                 .filter(i -> i.toSeconds() < 15)
                 .toList();
 
@@ -85,7 +117,7 @@ public class FlashCardServiceImpl implements FlashCardService {
         );
     }
 
-    private FlashCardBasicDto fromFlashCard(FlashCard flashCard, FlashCardAnswer optionalAnswer) {
+    private FlashCardBasicDto flashCardBasicDto(FlashCard flashCard, FlashCardAnswer optionalAnswer) {
         if (optionalAnswer != null) {
             resolveCard(flashCard, optionalAnswer).insertData(flashCard);
             flashCardRepository.save(flashCard);
@@ -97,7 +129,8 @@ public class FlashCardServiceImpl implements FlashCardService {
                         .collect(Collectors.toMap(
                                 v -> v, answer -> resolveCard(flashCard, answer).interval()
                         )),
-                basicMapper.conceptToDto(flashCard.getConcept())
+                basicMapper.conceptToDto(flashCard.getConcept()),
+                flashCard.getDueReview()
         );
     }
 

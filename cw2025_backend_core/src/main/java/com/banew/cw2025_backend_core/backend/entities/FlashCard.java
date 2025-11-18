@@ -34,9 +34,6 @@ public class FlashCard {
 
     public Boolean isShouldReview() {
         if (lastReview == null) return true;
-
-        return lastReview
-                .plus((long) (interval * 24 * 60), ChronoUnit.MINUTES)
-                .isBefore(Instant.now());
+        return dueReview.isBefore(Instant.now());
     }
 }

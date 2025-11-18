@@ -3,6 +3,7 @@ package com.banew.cw2025_backend_core.backend.controllers;
 import com.banew.cw2025_backend_common.dto.cards.FlashCardAnswer;
 import com.banew.cw2025_backend_common.dto.cards.FlashCardBasicDto;
 import com.banew.cw2025_backend_common.dto.cards.FlashCardDayStats;
+import com.banew.cw2025_backend_common.dto.courses.TopicCompendiumDto;
 import com.banew.cw2025_backend_core.backend.entities.UserProfile;
 import com.banew.cw2025_backend_core.backend.services.interfaces.FlashCardService;
 import lombok.AllArgsConstructor;
@@ -31,5 +32,11 @@ public class FlashCardController {
     @GetMapping("/stats")
     public FlashCardDayStats getDayStats(@AuthenticationPrincipal UserProfile currentUser) {
         return flashCardService.getDayStats(currentUser);
+    }
+    @PutMapping("/{flashCardId}/concept")
+    public FlashCardBasicDto updateConcept(@AuthenticationPrincipal UserProfile currentUser,
+                                           @PathVariable Long flashCardId,
+                                           @RequestBody TopicCompendiumDto.ConceptBasicDto newConcept) {
+        return flashCardService.updateConcept(currentUser, flashCardId, newConcept);
     }
 }

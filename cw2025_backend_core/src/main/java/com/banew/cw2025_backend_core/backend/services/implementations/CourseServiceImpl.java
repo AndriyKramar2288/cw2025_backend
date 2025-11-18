@@ -173,7 +173,9 @@ public class CourseServiceImpl implements CourseService {
     @Caching(
             evict = {
                     @CacheEvict(value = "courses", key = "#currentUser.id"),
-                    @CacheEvict(value = "courseById", key = "#courseId + '_' + #currentUser.id")
+                    @CacheEvict(value = "courseById", key = "#courseId + '_' + #currentUser.id"),
+                    @CacheEvict(value = "flashCardStatsByUserId", key = "#currentUser.id"),
+                    @CacheEvict(value = "flashCardsByUserId", key = "#currentUser.id")
             }
     )
     public TopicCompendiumDto updateCompendium(TopicCompendiumDto topicCompendiumDto,
