@@ -9,5 +9,6 @@ public interface CoursePlanService {
     CoursePlanBasicDto createCoursePlan(UserProfile currentUser, CoursePlanBasicDto dto);
     CoursePlanBasicDto updateCoursePlan(UserProfile currentUser, CoursePlanBasicDto dto);
     List<CoursePlanBasicDto> getAllExistingPlans();
+    List<CoursePlanBasicDto> getPlansBySearchQuery(String query);
     CoursePlanBasicDto getCoursePlanById(Long id);
 }

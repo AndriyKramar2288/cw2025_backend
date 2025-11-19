@@ -13,6 +13,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -65,6 +66,17 @@ public class CoursePlanServiceImpl implements CoursePlanService {
     @Transactional
     public List<CoursePlanBasicDto> getAllExistingPlans() {
         return coursePlanRepository.findAll().stream()
+                .map(basicMapper::coursePlanToBasicDto)
+                .toList();
+    }
+
+    @Override
+    @Transactional
+    public List<CoursePlanBasicDto> getPlansBySearchQuery(String query) {
+        return (query == null || query.isEmpty()
+                ? coursePlanRepository.findPopularCoursePlans(Pageable.ofSize(5))
+                : coursePlanRepository.findByText(query)
+                ).stream()
                 .map(basicMapper::coursePlanToBasicDto)
                 .toList();
     }

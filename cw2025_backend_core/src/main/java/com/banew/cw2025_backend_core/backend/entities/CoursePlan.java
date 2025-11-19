@@ -25,4 +25,6 @@ public class CoursePlan {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "coursePlan", orphanRemoval = true)
     @OrderColumn(name = "position")
     private List<Topic> topics;
+    @OneToMany(mappedBy = "coursePlan")
+    private List<Course> courses;
 }

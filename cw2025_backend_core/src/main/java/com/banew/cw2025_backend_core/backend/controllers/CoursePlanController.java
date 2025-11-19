@@ -35,6 +35,12 @@ public class CoursePlanController {
         return coursePlanService.getCoursePlanById(courseId);
     }
 
+    @GetMapping("/search")
+    public List<CoursePlanBasicDto> getPlansBySearchQuery(@RequestParam(value = "query", required = false)
+                                                              String searchQuery) {
+        return coursePlanService.getPlansBySearchQuery(searchQuery);
+    }
+
     @GetMapping("/")
     public List<CoursePlanBasicDto> getAllExistingPlans() {
         return coursePlanService.getAllExistingPlans();

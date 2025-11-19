@@ -24,7 +24,7 @@ public class UserProfile {
     private String password;
     @Column(length = 99, unique = true)
     private String email;
-    @Column(length = 255)
+    @Column(length = 512)
     private String photoSrc;
     @Column(length = 64)
     private List<String> roles;
