@@ -17,7 +17,7 @@ public class Compendium {
     @Id
     @GeneratedValue
     private long id;
-    @Lob
+    @Column(length = 4096)
     private String notes;
     @ManyToOne
     @JoinColumn(name = "course_id", nullable = false)

@@ -14,6 +14,7 @@ import com.banew.cw2025_backend_core.backend.repo.CompendiumRepository;
 import com.banew.cw2025_backend_core.backend.repo.ConceptRepository;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.factory.Mappers;
 
@@ -38,15 +39,15 @@ public interface BasicMapper {
 
     CoursePlanCourseDto coursePlanToCourseDto(CoursePlan coursePlan);
     TopicCompendiumDto compendiumToDto(Compendium compendium);
+    @Mapping(source = "currentCompendium.id", target = "currentCompendiumId")
     CourseDetailedDto courseToDetailedDto(Course course);
     TopicCompendiumDto.ConceptBasicDto conceptToDto(Concept concept);
 
     default CourseBasicDto courseToBasicDto(Course course,
                                             CompendiumRepository compendiumRepository,
                                             ConceptRepository conceptRepository) {
-        Optional<Compendium> compendium = course.getCurrentCompendiumId() != null?
-                compendiumRepository.findById(course.getCurrentCompendiumId()) :
-                Optional.empty();
+        Optional<Compendium> compendium =
+                Optional.ofNullable(course.getCurrentCompendium());
 
         String topicName = compendium.stream()
                 .map(c -> c.getTopic().getName())

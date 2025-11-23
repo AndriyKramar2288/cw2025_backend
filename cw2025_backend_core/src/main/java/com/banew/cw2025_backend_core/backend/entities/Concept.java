@@ -15,7 +15,7 @@ public class Concept {
     private long id;
     @Column(length = 255, nullable = false)
     private String name;
-    @Lob
+    @Column(length = 4096)
     private String description;
     @Column(nullable = false)
     private Boolean isFlashCard = false;

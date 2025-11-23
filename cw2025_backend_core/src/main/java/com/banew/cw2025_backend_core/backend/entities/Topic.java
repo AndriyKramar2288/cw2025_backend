@@ -15,7 +15,7 @@ public class Topic {
     private long id;
     @Column(length = 255, nullable = false)
     private String name;
-    @Lob
+    @Column(length = 4096)
     private String description;
     @ManyToOne
     @JoinColumn(name = "course_plan_id", nullable = false)

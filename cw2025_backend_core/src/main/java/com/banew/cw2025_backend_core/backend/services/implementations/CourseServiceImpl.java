@@ -125,18 +125,13 @@ public class CourseServiceImpl implements CourseService {
                                 + "'!"
                 ));
 
-        var currentCompendiumId = course.getCurrentCompendiumId();
-        if (currentCompendiumId == null)
+        var currentCompendium = course.getCurrentCompendium();
+        if (currentCompendium == null)
             throw new MyBadRequestException(
                     "This course isn't started or already ended!"
             );
 
-        var currentCompendium = compendiumRepository.findById(currentCompendiumId)
-                .orElseThrow(() -> new MyBadRequestException(
-                        "Compendium with id '" + currentCompendiumId + "' is no exists!"
-                ));
-
-        course.setCurrentCompendiumId(null);
+        course.setCurrentCompendium(null);
         endTopic(currentCompendium);
         courseRepository.save(course);
 
@@ -168,10 +163,7 @@ public class CourseServiceImpl implements CourseService {
         if (compendium.getStatus() != CompendiumStatus.LOCKED && compendium.getStatus() != CompendiumStatus.CAN_START)
             throw new MyBadRequestException("You can't begin this topic!");
 
-        Long currentCompendiumId = compendium.getCourse().getCurrentCompendiumId();
-        Optional<Compendium> currentCompendium = currentCompendiumId != null ?
-                compendiumRepository.findById(currentCompendiumId) :
-                Optional.empty();
+        Optional<Compendium> currentCompendium = Optional.ofNullable(compendium.getCourse().getCurrentCompendium());
 
         if (currentCompendium.isPresent()) {
             if (compendium.getIndex() != currentCompendium.get().getIndex() + 1)
@@ -196,7 +188,7 @@ public class CourseServiceImpl implements CourseService {
                     compendiumRepository.save(next);
                 });
 
-        compendium.getCourse().setCurrentCompendiumId(compendium.getId());
+        compendium.getCourse().setCurrentCompendium(compendium);
         courseRepository.save(compendium.getCourse());
 
         return basicMapper.compendiumToDto(compendium);

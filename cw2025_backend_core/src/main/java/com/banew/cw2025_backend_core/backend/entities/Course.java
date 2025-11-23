@@ -7,7 +7,6 @@ import lombok.Setter;
 
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 @Entity
@@ -27,5 +26,7 @@ public class Course {
     private Instant startedAt;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "course", orphanRemoval = true)
     private List<Compendium> compendiums = new ArrayList<>();
-    private Long currentCompendiumId;
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "current_compendium_id")
+    private Compendium currentCompendium;
 }
