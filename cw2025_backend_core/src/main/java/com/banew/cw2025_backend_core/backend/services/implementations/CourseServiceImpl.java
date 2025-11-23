@@ -6,7 +6,10 @@ import com.banew.cw2025_backend_common.dto.courses.CourseDetailedDto;
 import com.banew.cw2025_backend_common.dto.courses.TopicCompendiumDto;
 import com.banew.cw2025_backend_core.backend.entities.*;
 import com.banew.cw2025_backend_core.backend.exceptions.MyBadRequestException;
-import com.banew.cw2025_backend_core.backend.repo.*;
+import com.banew.cw2025_backend_core.backend.repo.CompendiumRepository;
+import com.banew.cw2025_backend_core.backend.repo.ConceptRepository;
+import com.banew.cw2025_backend_core.backend.repo.CoursePlanRepository;
+import com.banew.cw2025_backend_core.backend.repo.CourseRepository;
 import com.banew.cw2025_backend_core.backend.services.interfaces.CourseService;
 import com.banew.cw2025_backend_core.backend.utils.BasicMapper;
 import jakarta.transaction.Transactional;
@@ -17,16 +20,13 @@ import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
 public class CourseServiceImpl implements CourseService {
 
-    private TopicRepository topicRepository;
     private CoursePlanRepository coursePlanRepository;
     private CourseRepository courseRepository;
     private ConceptRepository conceptRepository;
@@ -34,35 +34,24 @@ public class CourseServiceImpl implements CourseService {
     private BasicMapper basicMapper;
 
     @Override
-    @Transactional
     @Cacheable(value = "courses", key = "#currentUser.id")
     public List<CourseBasicDto> getUserCourses(UserProfile currentUser) {
-        return courseRepository.findByStudent(currentUser).stream()
-                .map(o -> basicMapper.courseToBasicDto(o, compendiumRepository, conceptRepository))
-                .collect(Collectors.toList());
+        return courseRepository.findUserCourses(currentUser).stream()
+                .map(basicMapper::courseDbDataToBasicDto)
+                .toList();
     }
 
     @Override
-    @Transactional
     @Cacheable(value = "courseById", key = "#courseId + '_' + #currentUser.id")
     public CourseDetailedDto getCourseById(UserProfile currentUser, Long courseId) {
-        var ex = new MyBadRequestException(
-                "CoursePlan with id '" + courseId + "' is no exists!"
+        return basicMapper.courseToDetailedDto(
+                courseRepository.findByStudentAndCoursePlanIdWithFetch(currentUser, courseId)
+                        .orElseThrow(() -> new MyBadRequestException(
+                        "CoursePlan with id '" + courseId + "' and this user is no exists!"))
         );
-
-        var coursePlan = coursePlanRepository.findById(courseId)
-                .orElseThrow(() -> ex);
-
-        Course course = courseRepository.findByStudentAndCoursePlan(currentUser, coursePlan)
-                .orElseThrow(() -> ex);
-
-        course.getCompendiums().sort(Comparator.comparing(Compendium::getIndex));
-
-        return basicMapper.courseToDetailedDto(course);
     }
 
     @Override
-    @Transactional
     @Caching(
             evict = {
                     @CacheEvict(value = "courses", key = "#currentUser.id"),
@@ -71,17 +60,15 @@ public class CourseServiceImpl implements CourseService {
     )
     public CourseBasicDto beginCourse(Long courseId, UserProfile currentUser) {
 
-        var coursePlan = coursePlanRepository.findById(courseId)
-             .orElseThrow(() -> new MyBadRequestException(
-                     "CoursePlan with id '" + courseId + "' is no exists!"
-             ));
-
-        courseRepository.findByStudentAndCoursePlan(currentUser, coursePlan)
-            .ifPresent(course -> {
-                throw new MyBadRequestException(
+        if (courseRepository.existsByStudentAndCoursePlanId(currentUser, courseId))
+            throw new MyBadRequestException(
                     "For the current user this course is already began!"
-                );
-            });
+            );
+
+        var coursePlan = coursePlanRepository.findByIdWithTopics(courseId)
+                .orElseThrow(() -> new MyBadRequestException(
+                        "CoursePlan with id '" + courseId + "' is no exists!"
+                ));
 
         Course course = new Course();
         course.setStudent(currentUser);
@@ -99,11 +86,10 @@ public class CourseServiceImpl implements CourseService {
 
         courseRepository.save(course);
 
-        return basicMapper.courseToBasicDto(course, compendiumRepository, conceptRepository);
+        return courseToBasicDto(course);
     }
 
     @Override
-    @Transactional
     @Caching(
             evict = {
                     @CacheEvict(value = "courses", key = "#currentUser.id"),
@@ -112,16 +98,11 @@ public class CourseServiceImpl implements CourseService {
     )
     public CourseDetailedDto endCourse(Long courseId, UserProfile currentUser) {
 
-        CoursePlan coursePlan = coursePlanRepository.findById(courseId)
-                .orElseThrow(() -> new MyBadRequestException(
-                        "Course-plan with id '" + courseId + "' is no exists!"
-                ));
-
-        Course course = courseRepository.findByStudentAndCoursePlan(currentUser, coursePlan)
+        Course course = courseRepository.findByStudentAndCoursePlanId(currentUser, courseId)
                 .orElseThrow(() -> new MyBadRequestException(
                         "There is no compendium for user '"
                                 + currentUser.getUsername()
-                                + "' and coursePlan '" + coursePlan.getName()
+                                + "' and this course-plan!'"
                                 + "'!"
                 ));
 
@@ -147,16 +128,12 @@ public class CourseServiceImpl implements CourseService {
             }
     )
     public TopicCompendiumDto beginTopic(Long topicId, UserProfile currentUser, Long courseId) {
-        Topic topic = topicRepository.findById(topicId)
-                .orElseThrow(() -> new MyBadRequestException(
-                        "CoursePlan with id '" + topicId + "' is no exists!"
-                ));
 
-        Compendium compendium = compendiumRepository.findByTopicAndCourse_Student(topic, currentUser)
+        Compendium compendium = compendiumRepository.findByTopicIdAndStudent(topicId, currentUser)
                 .orElseThrow(() -> new MyBadRequestException(
                         "There is no compendium for user '"
                                 + currentUser.getUsername()
-                                + "' and topic '" + topic.getName()
+                                + "' and this topic '"
                                 + "'!"
                 ));
 
@@ -182,7 +159,7 @@ public class CourseServiceImpl implements CourseService {
         currentCompendium.ifPresent(this::endTopic);
 
         compendiumRepository
-                .findByIndexAndTopic(compendium.getIndex() + 1, topic)
+                .findByTopicIdAndStudentAndIndex(topicId, currentUser, compendium.getIndex() + 1)
                 .ifPresent(next -> {
                     next.setStatus(CompendiumStatus.CAN_START);
                     compendiumRepository.save(next);
@@ -222,20 +199,20 @@ public class CourseServiceImpl implements CourseService {
             topicCompendiumDto.concepts().forEach(conceptDto -> {
 
                 Optional<Concept> optionalConcept = (conceptDto.id() != null ?
-                        conceptRepository.findById(conceptDto.id()) : Optional.empty());
+                        compendium.getConcepts().stream()
+                                .filter(c -> conceptDto.id().equals(c.getId()))
+                                .findFirst() : Optional.empty());
 
                 Concept concept = optionalConcept.orElseGet(() -> {
                     Concept c = new Concept();
                     c.setCompendium(compendium);
+                    compendium.getConcepts().add(c);
                     return c;
                 });
 
                 concept.setName(conceptDto.name());
                 concept.setDescription(conceptDto.description());
                 concept.setIsFlashCard(conceptDto.isFlashCard());
-
-                if (optionalConcept.isEmpty())
-                    compendium.getConcepts().add(concept);
             });
 
             compendium.getConcepts()
@@ -247,6 +224,22 @@ public class CourseServiceImpl implements CourseService {
 
         compendiumRepository.save(compendium);
         return basicMapper.compendiumToDto(compendium);
+    }
+
+    private CourseBasicDto courseToBasicDto(Course course) {
+        Optional<Compendium> compendium =
+                Optional.ofNullable(course.getCurrentCompendium());
+
+        String topicName = compendium.stream()
+                .map(c -> c.getTopic().getName())
+                .findFirst().orElse(null);
+
+        return new CourseBasicDto(
+                course.getId(), course.getStartedAt(), basicMapper.coursePlanToCourseDto(course.getCoursePlan()),
+                topicName,
+                conceptRepository.countByCompendium_Course(course),
+                compendiumRepository.countByCourse(course)
+        );
     }
 
     private void endTopic(Compendium c) {

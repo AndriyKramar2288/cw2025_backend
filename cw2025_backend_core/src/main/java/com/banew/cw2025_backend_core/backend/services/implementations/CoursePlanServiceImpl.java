@@ -8,7 +8,6 @@ import com.banew.cw2025_backend_core.backend.repo.CoursePlanRepository;
 import com.banew.cw2025_backend_core.backend.repo.TopicRepository;
 import com.banew.cw2025_backend_core.backend.services.interfaces.CoursePlanService;
 import com.banew.cw2025_backend_core.backend.utils.BasicMapper;
-import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
@@ -63,18 +62,17 @@ public class CoursePlanServiceImpl implements CoursePlanService {
     }
 
     @Override
-    @Transactional
     public List<CoursePlanBasicDto> getAllExistingPlans() {
-        return coursePlanRepository.findAll().stream()
+        return coursePlanRepository.findCoursesForBasicDto().stream()
                 .map(basicMapper::coursePlanToBasicDto)
                 .toList();
     }
 
     @Override
-    @Transactional
     public List<CoursePlanBasicDto> getPlansBySearchQuery(String query) {
         return (query == null || query.isEmpty()
-                ? coursePlanRepository.findPopularCoursePlans(Pageable.ofSize(5))
+                ? coursePlanRepository.findCoursesByIdForBasicDto(
+                    coursePlanRepository.findPopularCoursePlanIds(Pageable.ofSize(5)))
                 : coursePlanRepository.findByText(query)
                 ).stream()
                 .map(basicMapper::coursePlanToBasicDto)

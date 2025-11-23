@@ -2,15 +2,19 @@ package com.banew.cw2025_backend_core.backend.repo;
 
 import com.banew.cw2025_backend_core.backend.entities.Compendium;
 import com.banew.cw2025_backend_core.backend.entities.Course;
-import com.banew.cw2025_backend_core.backend.entities.Topic;
 import com.banew.cw2025_backend_core.backend.entities.UserProfile;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.ListCrudRepository;
 
 import java.util.Optional;
 
 public interface CompendiumRepository extends ListCrudRepository<Compendium, Long> {
-    Optional<Compendium> findByTopicAndCourse_Student(Topic topic, UserProfile student);
-    Optional<Compendium> findByIndexAndTopic(int index, Topic topic);
+
+    @Query("select c from Compendium c where c.topic.id = ?1 and c.course.student = ?2 and c.index = ?3")
+    Optional<Compendium> findByTopicIdAndStudentAndIndex(long id, UserProfile student, int index);
+
+    @Query("select c from Compendium c where c.topic.id = ?1 and c.course.student = ?2")
+    Optional<Compendium> findByTopicIdAndStudent(long id, UserProfile student);
 
     long countByCourse(Course course);
 }

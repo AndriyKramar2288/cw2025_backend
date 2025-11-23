@@ -7,6 +7,7 @@ import lombok.Setter;
 
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 @Entity
@@ -29,4 +30,9 @@ public class Course {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "current_compendium_id")
     private Compendium currentCompendium;
+
+    public List<Compendium> getCompendiums() {
+        compendiums.sort(Comparator.comparing(Compendium::getIndex));
+        return compendiums;
+    }
 }

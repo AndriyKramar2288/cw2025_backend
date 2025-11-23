@@ -10,15 +10,12 @@ import com.banew.cw2025_backend_common.dto.users.UserProfileCoursePlanDto;
 import com.banew.cw2025_backend_common.dto.users.UserProfileDetailedDto;
 import com.banew.cw2025_backend_common.dto.users.UserRegisterForm;
 import com.banew.cw2025_backend_core.backend.entities.*;
-import com.banew.cw2025_backend_core.backend.repo.CompendiumRepository;
-import com.banew.cw2025_backend_core.backend.repo.ConceptRepository;
+import com.banew.cw2025_backend_core.backend.repo.dto.CourseBasicDtoDbData;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.factory.Mappers;
-
-import java.util.Optional;
 
 @Mapper(componentModel = "spring")
 public interface BasicMapper {
@@ -43,23 +40,7 @@ public interface BasicMapper {
     CourseDetailedDto courseToDetailedDto(Course course);
     TopicCompendiumDto.ConceptBasicDto conceptToDto(Concept concept);
 
-    default CourseBasicDto courseToBasicDto(Course course,
-                                            CompendiumRepository compendiumRepository,
-                                            ConceptRepository conceptRepository) {
-        Optional<Compendium> compendium =
-                Optional.ofNullable(course.getCurrentCompendium());
-
-        String topicName = compendium.stream()
-                .map(c -> c.getTopic().getName())
-                .findFirst().orElse(null);
-
-        return new CourseBasicDto(
-                course.getId(), course.getStartedAt(), coursePlanToCourseDto(course.getCoursePlan()),
-                topicName,
-                conceptRepository.countByCompendium_Course(course),
-                compendiumRepository.countByCourse(course)
-        );
-    }
+    CourseBasicDto courseDbDataToBasicDto(CourseBasicDtoDbData data);
 
     @AfterMapping
     default void linkTopics(@MappingTarget CoursePlan coursePlan) {
