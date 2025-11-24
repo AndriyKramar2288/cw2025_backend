@@ -20,7 +20,7 @@ public interface CoursePlanRepository extends ListCrudRepository<CoursePlan, Lon
 
     @Query("""
        select distinct c from CoursePlan c
-       join fetch c.topics
+       left join fetch c.topics
        join fetch c.author
        where c.id in :ids
        """)
@@ -28,13 +28,13 @@ public interface CoursePlanRepository extends ListCrudRepository<CoursePlan, Lon
 
     @Query("""
             select c from CoursePlan c
-            join fetch c.topics
+            left join fetch c.topics
             join fetch c.author
             where lower(c.name) like lower(concat('%', :q, '%'))
             """)
     List<CoursePlan> findByText(@Param("q") String text);
 
-    @Query("select c from CoursePlan c join fetch c.topics join fetch c.author")
+    @Query("select c from CoursePlan c left join fetch c.topics join fetch c.author")
     List<CoursePlan> findCoursesForBasicDto();
 
     @Query("select cp from CoursePlan cp left join fetch cp.topics where cp.id = ?1")

@@ -10,7 +10,7 @@ import java.util.Optional;
 
 public interface CompendiumRepository extends ListCrudRepository<Compendium, Long> {
 
-    @Query("select c from Compendium c join fetch c.concepts where c.id = ?1")
+    @Query("select c from Compendium c left join fetch c.concepts where c.id = ?1")
     Optional<Compendium> findByIdWithConcepts(long id);
 
     @Query("select c from Compendium c where c.topic.id = ?1 and c.course.student = ?2 and c.index = ?3")
@@ -19,7 +19,7 @@ public interface CompendiumRepository extends ListCrudRepository<Compendium, Lon
     @Query("""
             select c from Compendium c
             join fetch c.course
-            join fetch c.course.currentCompendium
+            left join fetch c.course.currentCompendium
             where c.topic.id = ?1 and c.course.student = ?2
             """)
     Optional<Compendium> findByTopicIdAndStudentWithCourse(long id, UserProfile student);
