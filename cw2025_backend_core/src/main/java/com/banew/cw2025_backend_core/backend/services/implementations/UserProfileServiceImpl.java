@@ -7,7 +7,6 @@ import com.banew.cw2025_backend_core.backend.repo.UserProfileRepository;
 import com.banew.cw2025_backend_core.backend.services.interfaces.JwtService;
 import com.banew.cw2025_backend_core.backend.services.interfaces.UserProfileService;
 import com.banew.cw2025_backend_core.backend.utils.BasicMapper;
-import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -51,10 +50,9 @@ public class UserProfileServiceImpl implements UserProfileService {
     }
 
     @Override
-    @Transactional
     @Cacheable(value = "userProfileDetailedById", key = "#userId")
     public UserProfileDetailedDto getUserProfileDetailedById(Long userId) {
-        var user = userProfileRepository.findById(userId)
+        var user = userProfileRepository.findByIdForDetailedDto(userId)
                 .orElseThrow(() -> new MyBadRequestException(
                         "User with id " + userId + " was not found!"
                 ));

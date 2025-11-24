@@ -13,11 +13,11 @@ import com.banew.cw2025_backend_core.backend.repo.ConceptRepository;
 import com.banew.cw2025_backend_core.backend.repo.FlashCardRepository;
 import com.banew.cw2025_backend_core.backend.services.interfaces.FlashCardService;
 import com.banew.cw2025_backend_core.backend.utils.BasicMapper;
-import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -37,8 +37,12 @@ public class FlashCardServiceImpl implements FlashCardService {
     private ConceptRepository conceptRepository;
     private BasicMapper basicMapper;
 
+    /**
+     * Одержати список карток, який може наразі переглянути користувач
+     * @param currentUser поточний користувач
+     * @return список
+     */
     @Override
-    @Transactional
     @Cacheable(value = "flashCardsByUserId", key = "#currentUser.id")
     public List<FlashCardBasicDto> getCards(UserProfile currentUser) {
         return flashCardRepository.availableCards(currentUser, Instant.now()).stream()
@@ -46,8 +50,14 @@ public class FlashCardServiceImpl implements FlashCardService {
                 .toList();
     }
 
+    /**
+     * Оновити концепт для флешкартки з деяким id
+     * @param currentUser поточний користувач
+     * @param flashCardId id флешкартки
+     * @param newConcept нова версія концепту
+     * @return новий сумарний вигляд флешкартки після зберігання в БД
+     */
     @Override
-    @Transactional
     public FlashCardBasicDto updateConcept(UserProfile currentUser, Long flashCardId, TopicCompendiumDto.ConceptBasicDto newConcept) {
         FlashCard flashCard = flashCardRepository.findByIdAndStudent(flashCardId, currentUser)
                 .orElseThrow(() -> new MyBadRequestException(
@@ -63,8 +73,13 @@ public class FlashCardServiceImpl implements FlashCardService {
         return flashCardBasicDto(flashCard, null);
     }
 
+    /**
+     * @param answer відповідь на флешкартку
+     * @param currentUser поточний користувач
+     * @param flashCardId id флешкартки
+     * @return новий сумарний вигляд флешкартки після зберігання в БД
+     */
     @Override
-    @Transactional
     @Caching(
             evict = {
                     @CacheEvict(value = "flashCardStatsByUserId", key = "#currentUser.id"),
@@ -87,8 +102,11 @@ public class FlashCardServiceImpl implements FlashCardService {
         return flashCardBasicDto(flashCard, answer);
     }
 
+    /**
+     * @param currentUser поточний користувач
+     * @return статистика користувача по флешкартках за останню добу
+     */
     @Override
-    @Transactional
     @Cacheable(value = "flashCardStatsByUserId", key = "#currentUser.id")
     public FlashCardDayStats getDayStats(UserProfile currentUser) {
 
@@ -117,7 +135,13 @@ public class FlashCardServiceImpl implements FlashCardService {
         );
     }
 
-    private FlashCardBasicDto flashCardBasicDto(FlashCard flashCard, FlashCardAnswer optionalAnswer) {
+    /**
+     * Згенерувати ДТО флешкартки, при тому, в разі необхідності, оновити картку з деякою відповіддю
+     * @param flashCard флешкартка (сутність)
+     * @param optionalAnswer опціональна відповідь
+     * @return ДТО флешкартки, де, якщо було передано optionalAnswer, попередньо була надана і збережена відповідь
+     */
+    private FlashCardBasicDto flashCardBasicDto(FlashCard flashCard, @Nullable FlashCardAnswer optionalAnswer) {
         if (optionalAnswer != null) {
             resolveCard(flashCard, optionalAnswer).insertData(flashCard);
             flashCardRepository.save(flashCard);

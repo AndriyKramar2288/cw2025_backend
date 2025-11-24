@@ -13,11 +13,16 @@ public interface FlashCardRepository extends ListCrudRepository<FlashCard, Long>
 
     List<FlashCard> findByConcept_Compendium_Course_StudentAndLastReviewAfter(UserProfile student, Instant lastReview);
 
-    @Query("select f from FlashCard f where f.id = ?1 and f.concept.compendium.course.student = ?2")
+    @Query("""
+            select f from FlashCard f
+            join fetch f.concept
+            where f.id = ?1 and f.concept.compendium.course.student = ?2
+            """)
     Optional<FlashCard> findByIdAndStudent(long id, UserProfile student);
 
     @Query("""
             select f from FlashCard f
+            join fetch f.concept
             where f.concept.compendium.course.student = ?1 and (f.dueReview is null or f.dueReview < ?2)""")
     List<FlashCard> availableCards(UserProfile student, Instant now);
 

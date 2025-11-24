@@ -137,10 +137,10 @@ class CourseServiceIntegrationTest {
     @Test
     void beginTopic_firstTopic_setsCurrentCompendium() {
         // Given - починаємо курс
-        courseService.beginCourse(testCoursePlan.getId(), testUser);
+        var crs = courseService.beginCourse(testCoursePlan.getId(), testUser);
 
         // When - починаємо перший топік
-        TopicCompendiumDto result = courseService.beginTopic(topic1.getId(), testUser);
+        TopicCompendiumDto result = courseService.beginTopic(topic1.getId(), testUser, crs.id());
 
         // Then
         assertNotNull(result);
@@ -148,30 +148,30 @@ class CourseServiceIntegrationTest {
 
         // Перевіряємо, що currentCompendiumId встановлено
         List<Course> courses = courseRepository.findByStudent(testUser);
-        assertNotNull(courses.get(0).getCurrentCompendiumId());
+        assertNotNull(courses.get(0).getCurrentCompendium());
     }
 
     @Test
     void beginTopic_secondTopicWithoutFirst_throwsException() {
         // Given - починаємо курс
-        courseService.beginCourse(testCoursePlan.getId(), testUser);
+        var crs = courseService.beginCourse(testCoursePlan.getId(), testUser);
 
         // When & Then - пробуємо почати другий топік без першого
         MyBadRequestException exception = assertThrows(
                 MyBadRequestException.class,
-                () -> courseService.beginTopic(topic2.getId(), testUser)
+                () -> courseService.beginTopic(topic2.getId(), testUser, crs.id())
         );
     }
 
     @Test
     void beginTopic_sequentialTopics_worksCorrectly() {
         // Given - починаємо курс
-        courseService.beginCourse(testCoursePlan.getId(), testUser);
+        var crs = courseService.beginCourse(testCoursePlan.getId(), testUser);
 
         // When - послідовно починаємо топіки
-        TopicCompendiumDto result1 = courseService.beginTopic(topic1.getId(), testUser);
-        TopicCompendiumDto result2 = courseService.beginTopic(topic2.getId(), testUser);
-        TopicCompendiumDto result3 = courseService.beginTopic(topic3.getId(), testUser);
+        TopicCompendiumDto result1 = courseService.beginTopic(topic1.getId(), testUser, crs.id());
+        TopicCompendiumDto result2 = courseService.beginTopic(topic2.getId(), testUser, crs.id());
+        TopicCompendiumDto result3 = courseService.beginTopic(topic3.getId(), testUser, crs.id());
 
         // Then
         assertEquals("Variables", result1.topic().name());
@@ -182,13 +182,13 @@ class CourseServiceIntegrationTest {
     @Test
     void beginTopic_skipTopic_throwsException() {
         // Given
-        courseService.beginCourse(testCoursePlan.getId(), testUser);
-        courseService.beginTopic(topic1.getId(), testUser);
+        var crs = courseService.beginCourse(testCoursePlan.getId(), testUser);
+        courseService.beginTopic(topic1.getId(), testUser, crs.id());
 
         // When & Then - пробуємо пропустити topic2 і почати topic3
         MyBadRequestException exception = assertThrows(
                 MyBadRequestException.class,
-                () -> courseService.beginTopic(topic3.getId(), testUser)
+                () -> courseService.beginTopic(topic3.getId(), testUser, crs.id())
         );
 
         assertTrue(exception.getMessage().contains("Wrong position"));
@@ -197,12 +197,12 @@ class CourseServiceIntegrationTest {
     @Test
     void beginTopic_nonExistingTopic_throwsException() {
         // Given
-        courseService.beginCourse(testCoursePlan.getId(), testUser);
+        var crs = courseService.beginCourse(testCoursePlan.getId(), testUser);
 
         // When & Then
         assertThrows(
                 MyBadRequestException.class,
-                () -> courseService.beginTopic(999L, testUser)
+                () -> courseService.beginTopic(999L, testUser, crs.id())
         );
     }
 
@@ -211,8 +211,8 @@ class CourseServiceIntegrationTest {
     @Test
     void updateCompendium_addNotes_savesCorrectly() {
         // Given
-        courseService.beginCourse(testCoursePlan.getId(), testUser);
-        TopicCompendiumDto compendium = courseService.beginTopic(topic1.getId(), testUser);
+        var crs = courseService.beginCourse(testCoursePlan.getId(), testUser);
+        TopicCompendiumDto compendium = courseService.beginTopic(topic1.getId(), testUser, crs.id());
 
         // When
         TopicCompendiumDto updateDto = new TopicCompendiumDto(
@@ -223,7 +223,7 @@ class CourseServiceIntegrationTest {
                 CompendiumStatus.LOCKED
         );
 
-        TopicCompendiumDto result = courseService.updateCompendium(updateDto, testUser);
+        TopicCompendiumDto result = courseService.updateCompendium(updateDto, testUser, crs.id());
 
         // Then
         assertEquals("These are my notes about variables", result.notes());
@@ -236,8 +236,8 @@ class CourseServiceIntegrationTest {
     @Test
     void updateCompendium_addConcepts_savesCorrectly() {
         // Given
-        courseService.beginCourse(testCoursePlan.getId(), testUser);
-        TopicCompendiumDto compendium = courseService.beginTopic(topic1.getId(), testUser);
+        var crs = courseService.beginCourse(testCoursePlan.getId(), testUser);
+        TopicCompendiumDto compendium = courseService.beginTopic(topic1.getId(), testUser, crs.id());
 
         // When
         var concept1 = new TopicCompendiumDto.ConceptBasicDto(
@@ -260,7 +260,7 @@ class CourseServiceIntegrationTest {
                 CompendiumStatus.LOCKED
         );
 
-        TopicCompendiumDto result = courseService.updateCompendium(updateDto, testUser);
+        TopicCompendiumDto result = courseService.updateCompendium(updateDto, testUser, crs.id());
 
         // Then
         assertEquals(2, result.concepts().size());
@@ -273,8 +273,8 @@ class CourseServiceIntegrationTest {
     @Test
     void updateCompendium_updateExistingConcept_modifiesCorrectly() {
         // Given - додаємо концепт
-        courseService.beginCourse(testCoursePlan.getId(), testUser);
-        TopicCompendiumDto compendium = courseService.beginTopic(topic1.getId(), testUser);
+        var crs = courseService.beginCourse(testCoursePlan.getId(), testUser);
+        TopicCompendiumDto compendium = courseService.beginTopic(topic1.getId(), testUser, crs.id());
 
         var concept = new TopicCompendiumDto.ConceptBasicDto(
                 null,
@@ -290,7 +290,7 @@ class CourseServiceIntegrationTest {
                 CompendiumStatus.LOCKED
         );
 
-        TopicCompendiumDto saved = courseService.updateCompendium(updateDto1, testUser);
+        TopicCompendiumDto saved = courseService.updateCompendium(updateDto1, testUser, crs.id());
         Long conceptId = saved.concepts().get(0).id();
 
         // When - оновлюємо існуючий концепт
@@ -308,7 +308,7 @@ class CourseServiceIntegrationTest {
                 CompendiumStatus.LOCKED
         );
 
-        TopicCompendiumDto result = courseService.updateCompendium(updateDto2, testUser);
+        TopicCompendiumDto result = courseService.updateCompendium(updateDto2, testUser, crs.id());
 
         // Then
         assertEquals("New description", result.concepts().get(0).description());
@@ -328,7 +328,7 @@ class CourseServiceIntegrationTest {
         // When & Then
         MyBadRequestException exception = assertThrows(
                 MyBadRequestException.class,
-                () -> courseService.updateCompendium(updateDto, testUser)
+                () -> courseService.updateCompendium(updateDto, testUser, 5L)
         );
 
         assertTrue(exception.getMessage().contains("is no exists"));
@@ -337,8 +337,8 @@ class CourseServiceIntegrationTest {
     @Test
     void updateCompendium_nullFields_keepsOldValues() {
         // Given
-        courseService.beginCourse(testCoursePlan.getId(), testUser);
-        TopicCompendiumDto compendium = courseService.beginTopic(topic1.getId(), testUser);
+        var crs = courseService.beginCourse(testCoursePlan.getId(), testUser);
+        TopicCompendiumDto compendium = courseService.beginTopic(topic1.getId(), testUser, crs.id());
 
         // Додаємо нотатки
         TopicCompendiumDto updateDto1 = new TopicCompendiumDto(
@@ -348,7 +348,7 @@ class CourseServiceIntegrationTest {
                 compendium.concepts(),
                 CompendiumStatus.LOCKED
         );
-        courseService.updateCompendium(updateDto1, testUser);
+        courseService.updateCompendium(updateDto1, testUser, crs.id());
 
         // When - оновлюємо без нотаток
         TopicCompendiumDto updateDto2 = new TopicCompendiumDto(
@@ -359,7 +359,7 @@ class CourseServiceIntegrationTest {
                 CompendiumStatus.LOCKED
         );
 
-        TopicCompendiumDto result = courseService.updateCompendium(updateDto2, testUser);
+        TopicCompendiumDto result = courseService.updateCompendium(updateDto2, testUser, crs.id());
 
         // Then - нотатки залишились
         assertEquals("Original notes", result.notes());

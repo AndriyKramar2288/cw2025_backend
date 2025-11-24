@@ -29,7 +29,6 @@ public interface CourseRepository extends ListCrudRepository<Course, Long> {
     @Query("""
             select c from Course c
             left join fetch c.currentCompendium
-            left join fetch c.currentCompendium.concepts
             where c.student = ?1 and c.coursePlan.id = ?2
             """)
     Optional<Course> findByStudentAndCoursePlanId(UserProfile student, long id);
