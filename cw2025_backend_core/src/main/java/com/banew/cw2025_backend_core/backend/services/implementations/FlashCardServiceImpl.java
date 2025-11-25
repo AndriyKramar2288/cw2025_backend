@@ -58,6 +58,15 @@ public class FlashCardServiceImpl implements FlashCardService {
      * @return новий сумарний вигляд флешкартки після зберігання в БД
      */
     @Override
+    @Caching(
+            evict = {
+                    @CacheEvict(value = "flashCardsByUserId", key = "#currentUser.id"),
+                    @CacheEvict(
+                            value = "courseById",
+                            key = "@coursePlanRepository.findIdByFlashCardId(#flashCardId) + '_' + #currentUser.id"
+                    )
+            }
+    )
     public FlashCardBasicDto updateConcept(UserProfile currentUser, Long flashCardId, TopicCompendiumDto.ConceptBasicDto newConcept) {
         FlashCard flashCard = flashCardRepository.findByIdAndStudent(flashCardId, currentUser)
                 .orElseThrow(() -> new MyBadRequestException(

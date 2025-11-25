@@ -13,6 +13,12 @@ public interface CoursePlanRepository extends ListCrudRepository<CoursePlan, Lon
 
     @Query("""
             select c.id from CoursePlan c
+            join c.courses.compendiums.concepts concepts
+            where concepts.flashCard.id = ?1""")
+    long findIdByFlashCardId(long id);
+
+    @Query("""
+            select c.id from CoursePlan c
             left join c.courses crs
             group by c order by count(crs) desc
             """)
