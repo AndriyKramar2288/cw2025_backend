@@ -4,8 +4,7 @@ import com.banew.cw2025_backend_common.dto.coursePlans.CoursePlanBasicDto;
 import com.banew.cw2025_backend_core.backend.entities.CoursePlan;
 import com.banew.cw2025_backend_core.backend.entities.UserProfile;
 import com.banew.cw2025_backend_core.backend.exceptions.MyBadRequestException;
-import com.banew.cw2025_backend_core.backend.repo.CoursePlanRepository;
-import com.banew.cw2025_backend_core.backend.repo.UserProfileRepository;
+import com.banew.cw2025_backend_core.backend.repo.*;
 import com.banew.cw2025_backend_core.backend.services.interfaces.CoursePlanService;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,8 +29,20 @@ class CoursePlanServiceIntegrationTest {
     @Autowired
     private UserProfileRepository userProfileRepository;
 
+    @Autowired
+    private CourseRepository courseRepository;
+
+    @Autowired
+    private TopicRepository topicRepository;
+
+    @Autowired
+    private CompendiumRepository compendiumRepository;
+
     @BeforeEach
     void cleanDB() {
+        compendiumRepository.deleteAll();
+        courseRepository.deleteAll();
+        topicRepository.deleteAll();
         coursePlanRepository.deleteAll();
         userProfileRepository.deleteAll();
     }
@@ -47,7 +58,7 @@ class CoursePlanServiceIntegrationTest {
 
         // Then
         assertNotNull(result);
-        assertEquals(2, result.getTopics().size());
+        assertEquals(2, result.topics().size());
 
         // Перевіряємо в БД
         List<CoursePlan> plans = coursePlanRepository.findAll();
@@ -71,24 +82,30 @@ class CoursePlanServiceIntegrationTest {
 
         CoursePlanBasicDto result = coursePlanService.createCoursePlan(user, dto);
 
-        result.setName("BBCZZ");
-        result.setDescription("ABBSEWQ");
-
-        CoursePlanBasicDto.TopicBasicDto topic1changed = result.getTopics().getFirst();
-        topic1changed.setName("Loops forever");
-        topic1changed.setDescription("Learn about abobas");
-
         // When
-        var result2 = coursePlanService.updateCoursePlan(user, result);
+        var result2 = coursePlanService.updateCoursePlan(user, new CoursePlanBasicDto(
+                result.id(),
+                "BBCZZ",
+                result.author(),
+                "ABBSEWQ",
+                List.of(
+                        new CoursePlanBasicDto.TopicBasicDto(
+                                result.topics().get(0).id(),
+                                "Loops forever",
+                                "Learn about abobas"
+                        ),
+                        result.topics().get(1)
+                )
+        ));
 
         // Then
-        assertEquals("BBCZZ", result2.getName());
-        assertEquals("ABBSEWQ", result2.getDescription());
+        assertEquals("BBCZZ", result2.name());
+        assertEquals("ABBSEWQ", result2.description());
         assertNotNull(result2);
-        assertEquals(2, result.getTopics().size());
+        assertEquals(2, result.topics().size());
 
-        CoursePlanBasicDto.TopicBasicDto topicBasicDto = result2.getTopics().getFirst();
-        assertEquals("Loops forever", topicBasicDto.getName());
+        CoursePlanBasicDto.TopicBasicDto topicBasicDto = result2.topics().getFirst();
+        assertEquals("Loops forever", topicBasicDto.name());
 
         // Given 2
         var user2 = createAndSaveUser("John Pidoras", "aboba1588@mgail.com", "wqeqweqwq");
@@ -99,20 +116,20 @@ class CoursePlanServiceIntegrationTest {
     }
 
     private CoursePlanBasicDto createSampleCoursePlanDto() {
-        CoursePlanBasicDto dto = new CoursePlanBasicDto();
-        dto.setName("Java Basics");
-        dto.setDescription("Learn Java from scratch");
+        CoursePlanBasicDto.TopicBasicDto topic1 = new CoursePlanBasicDto.TopicBasicDto(null,
+                "Variables",
+                "Learn about variables");
 
-        CoursePlanBasicDto.TopicBasicDto topic1 = new CoursePlanBasicDto.TopicBasicDto();
-        topic1.setName("Variables");
-        topic1.setDescription("Learn about variables");
+        CoursePlanBasicDto.TopicBasicDto topic2 = new CoursePlanBasicDto.TopicBasicDto(null,
+                "Loops",
+                "Learn about loops");
 
-        CoursePlanBasicDto.TopicBasicDto topic2 = new CoursePlanBasicDto.TopicBasicDto();
-        topic2.setName("Loops");
-        topic2.setDescription("Learn about loops");
 
-        dto.setTopics(List.of(topic1, topic2));
-        return dto;
+        return new CoursePlanBasicDto(null,
+                "Java Basics",
+                null,
+                "Learn Java from scratch",
+                List.of(topic1, topic2));
     }
 
     private UserProfile createAndSaveUser(String username, String email, String password) {

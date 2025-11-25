@@ -71,27 +71,29 @@ public class UserProfileServiceTest {
             return user;
         });
 
-        UserRegisterForm form = new UserRegisterForm();
-        form.setEmail(faker.internet().emailAddress());
-        form.setUsername(faker.name().fullName());
-        form.setPassword(faker.credentials().password(8, 20));
+        UserRegisterForm form = new UserRegisterForm(
+                faker.internet().emailAddress(),
+                faker.name().fullName(),
+                null,
+                faker.credentials().password(8, 20)
+        );
 
         // When
         UserTokenFormResult result = userProfileService.register(form);
 
         // Then
         assertNotNull(result);
-        assertNotNull(result.getToken());
-        assertFalse(result.getMessage().isEmpty());
-        assertEquals(201, result.getCode());
-        assertEquals(form.getUsername(), result.getUserProfile().getUsername());
-        assertEquals(form.getEmail(), result.getUserProfile().getEmail());
+        assertNotNull(result.token());
+        assertFalse(result.message().isEmpty());
+        assertEquals(201, result.code());
+        assertEquals(form.username(), result.userProfile().username());
+        assertEquals(form.email(), result.userProfile().email());
 
         // Verify interactions
-        verify(userProfileRepository).findByEmail(form.getEmail());
+        verify(userProfileRepository).findByEmail(form.email());
         verify(userProfileRepository).save(argThat(user ->
                 user.getRoles().contains("USER") &&
-                        !user.getPassword().equals(form.getPassword()) // password should be encoded
+                        !user.getPassword().equals(form.password()) // password should be encoded
         ));
     }
 
@@ -102,10 +104,12 @@ public class UserProfileServiceTest {
         when(userProfileRepository.findByEmail(existingEmail))
                 .thenReturn(Optional.of(new UserProfile()));
 
-        UserRegisterForm form = new UserRegisterForm();
-        form.setEmail(existingEmail);
-        form.setUsername("Test User");
-        form.setPassword("password123");
+        UserRegisterForm form = new UserRegisterForm(
+                existingEmail,
+                "Test User",
+                null,
+                "password123"
+        );
 
         // When & Then
         RuntimeException exception = assertThrows(RuntimeException.class,
@@ -126,10 +130,12 @@ public class UserProfileServiceTest {
             return user;
         });
 
-        UserRegisterForm form = new UserRegisterForm();
-        form.setEmail(faker.internet().emailAddress());
-        form.setUsername(faker.name().fullName());
-        form.setPassword(rawPassword);
+        UserRegisterForm form = new UserRegisterForm(
+                faker.internet().emailAddress(),
+                faker.name().fullName(),
+                null,
+                rawPassword
+        );
 
         // When
         userProfileService.register(form);
@@ -160,19 +166,17 @@ public class UserProfileServiceTest {
 
         when(userProfileRepository.findByEmail(email)).thenReturn(Optional.of(existingUser));
 
-        UserLoginForm form = new UserLoginForm();
-        form.setEmail(email);
-        form.setPassword(password);
+        UserLoginForm form = new UserLoginForm(email, password);
 
         // When
         UserTokenFormResult result = userProfileService.login(form);
 
         // Then
         assertNotNull(result);
-        assertNotNull(result.getToken());
-        assertEquals(200, result.getCode());
-        assertEquals("Successful login!", result.getMessage());
-        assertEquals(email, result.getUserProfile().getEmail());
+        assertNotNull(result.token());
+        assertEquals(200, result.code());
+        assertEquals("Successful login!", result.message());
+        assertEquals(email, result.userProfile().email());
         verify(userProfileRepository).findByEmail(email);
     }
 
@@ -181,9 +185,7 @@ public class UserProfileServiceTest {
         // Given
         when(userProfileRepository.findByEmail(any())).thenReturn(Optional.empty());
 
-        UserLoginForm form = new UserLoginForm();
-        form.setEmail("nonexistent@test.com");
-        form.setPassword("password123");
+        UserLoginForm form = new UserLoginForm("nonexistent@test.com", "password123");
 
         // When & Then
         assertThrows(MyBadRequestException.class,
@@ -205,9 +207,7 @@ public class UserProfileServiceTest {
 
         when(userProfileRepository.findByEmail(email)).thenReturn(Optional.of(existingUser));
 
-        UserLoginForm form = new UserLoginForm();
-        form.setEmail(email);
-        form.setPassword(wrongPassword);
+        UserLoginForm form = new UserLoginForm(email, wrongPassword);
 
         // When & Then
         assertThrows(MyBadRequestException.class,
@@ -225,9 +225,7 @@ public class UserProfileServiceTest {
         existingUser.setUsername("Old Name");
         existingUser.setPhotoSrc("old-photo.jpg");
 
-        UserProfileBasicDto updateDto = new UserProfileBasicDto();
-        updateDto.setEmail("new@test.com");
-        updateDto.setUsername("New Name");
+        UserProfileBasicDto updateDto = new UserProfileBasicDto(1L, "New Name", "new@test.com", null);
 
         when(userProfileRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -235,8 +233,8 @@ public class UserProfileServiceTest {
         UserProfileBasicDto result = userProfileService.updateUser(updateDto, existingUser);
 
         // Then
-        assertEquals("new@test.com", result.getEmail());
-        assertEquals("New Name", result.getUsername());
+        assertEquals("new@test.com", result.email());
+        assertEquals("New Name", result.username());
         verify(userProfileRepository).save(existingUser);
     }
 
@@ -249,8 +247,9 @@ public class UserProfileServiceTest {
         existingUser.setUsername("Old Name");
         existingUser.setPhotoSrc("old-photo.jpg");
 
-        UserProfileBasicDto updateDto = new UserProfileBasicDto();
-        updateDto.setUsername("New Name");
+        UserProfileBasicDto updateDto = new UserProfileBasicDto(
+                1L, "New Name", null, null
+        );
         // email and photoSrc are null
 
         when(userProfileRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
@@ -259,9 +258,9 @@ public class UserProfileServiceTest {
         UserProfileBasicDto result = userProfileService.updateUser(updateDto, existingUser);
 
         // Then
-        assertEquals("old@test.com", result.getEmail()); // not changed
-        assertEquals("New Name", result.getUsername()); // changed
-        assertEquals("old-photo.jpg", result.getPhotoSrc()); // not changed
+        assertEquals("old@test.com", result.email()); // not changed
+        assertEquals("New Name", result.username()); // changed
+        assertEquals("old-photo.jpg", result.photoSrc()); // not changed
     }
 
     // ========== GET USER BY ID TESTS ==========

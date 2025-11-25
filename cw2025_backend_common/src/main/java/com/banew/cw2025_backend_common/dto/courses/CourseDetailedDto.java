@@ -1,12 +1,12 @@
 package com.banew.cw2025_backend_common.dto.courses;
 
 import java.time.Instant;
+import java.util.List;
 
-public record CourseBasicDto (
+public record CourseDetailedDto(
         Long id,
         Instant startedAt,
         CoursePlanCourseDto coursePlan,
-        String currentTopic,
-        Long totalConcepts,
-        Long totalTopics
-) {}
+        List<TopicCompendiumDto> compendiums,
+        Long currentCompendiumId
+) { }

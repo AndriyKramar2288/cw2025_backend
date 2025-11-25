@@ -17,7 +17,7 @@ public class CoursePlan {
     private long id;
     @Column(length = 255, nullable = false)
     private String name;
-    @Lob
+    @Column(length = 4096)
     private String description;
     @ManyToOne
     @JoinColumn(name = "author_id")
@@ -25,4 +25,6 @@ public class CoursePlan {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "coursePlan", orphanRemoval = true)
     @OrderColumn(name = "position")
     private List<Topic> topics;
+    @OneToMany(mappedBy = "coursePlan")
+    private List<Course> courses;
 }

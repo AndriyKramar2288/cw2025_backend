@@ -1,9 +1,6 @@
 package com.banew.cw2025_backend_core.backend.services.interfaces;
 
-import com.banew.cw2025_backend_common.dto.users.UserLoginForm;
-import com.banew.cw2025_backend_common.dto.users.UserProfileBasicDto;
-import com.banew.cw2025_backend_common.dto.users.UserRegisterForm;
-import com.banew.cw2025_backend_common.dto.users.UserTokenFormResult;
+import com.banew.cw2025_backend_common.dto.users.*;
 import com.banew.cw2025_backend_core.backend.entities.UserProfile;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
@@ -14,6 +11,7 @@ import java.util.Optional;
 public interface UserProfileService {
     Converter<Jwt,? extends AbstractAuthenticationToken> myJwtAuthenticationConverter();
     Optional<UserProfile> getUserById(Long userId);
+    UserProfileDetailedDto getUserProfileDetailedById(Long userId);
     UserProfileBasicDto updateUser(UserProfileBasicDto dto, UserProfile previousProfile);
     UserTokenFormResult register(UserRegisterForm form);
     UserTokenFormResult login(UserLoginForm form);
