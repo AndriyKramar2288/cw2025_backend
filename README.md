@@ -1,6 +1,6 @@
 # 'Seezu' API-service (course work 2025)
 
-Backend для мобільного застосунку 'Seezu'.
+Backend для мобільного застосунку **'Seezu'**.
 
 ## Технології
 
@@ -10,6 +10,7 @@ Backend для мобільного застосунку 'Seezu'.
 - PostgreSQL
 - Maven
 - Docker
+- GraalVM
 
 ## Функціонал
 
@@ -18,14 +19,16 @@ Backend для мобільного застосунку 'Seezu'.
 - ендпоінти для доєднання до курсів, прохід по темах та заповнення конспектів
 - Кешування за допомогою Spring Cache
 - Валідація та обробка помилок
-- REST API для фронтенду
+- REST API для клієнта
 
 ## API
 
 Всі ендпоінти знаходяться за базовим шляхом /api.
-Приклади:
-- GET /api/course/ — отримати список власних курсів
-- PUT /api/cards/{flashCardId}/concept — оновити концепт флешкартки
+
+#### Приклади:
+
+- **GET /api/course/** — отримати список власних курсів
+- **PUT /api/cards/{flashCardId}/concept** — оновити концепт флешкартки
 
 Повна документація Swagger доступна за шляхом `/api/swagger-ui/index.html` після запуску програми.
 
@@ -63,11 +66,16 @@ logging:
 
 secret.decoder_key: # any long string secret key
 ```
-вказавши усі необхідні дані, що позначені коментарями.
+При цьому вкажіть усі необхідні дані, що позначені **коментарями**.
 ### Крок 4. Запуск
 #### Запуск за замовчуванням
 ```bash
-./mvnw spring-boot:run
+cd ./cw2025_backend_core
+../mvnw spring-boot:run
+```
+Зверніть увагу, що для цього необхідно попередньо виконати установку залежностей в **локальний репозиторій**:
+```bash
+./mvnw clean install -DskipTests
 ```
 #### Збірка та запуск через JAR
 ```bash
@@ -75,12 +83,25 @@ secret.decoder_key: # any long string secret key
 java -jar target/app.jar
 ```
 ### Крок 5. Деплой
-Спершу слід побудувати та запушити контейнер на Docker Hub.
-Поточне розташування діючого контейнера: `banew/cw2025_backend_docker_repo:cw_img`
+Спершу слід побудувати та запушити образ на Docker Hub.
+**Є два варіанти**: будувати образ, що звично збирає застосунок в JAR та запускає з-під JVM, або ж будувати виконуваний
+файл через GraalVM, що значно підвищує швидкість запуску програми, проте може спровокувати багато проблем.
+#### Збірка образу з JAR
 ```bash
 docker build . -t cw2025_backend_image
+```
+#### Збірка образу з файлом GraalVM
+```bash
+docker build -f Dockerfile.native -t cw2025_backend_image
+```
+Після побудови образу, його слід запушити на Docker Hub.
+Поточне розташування чинного контейнера (образу): `banew/cw2025_backend_docker_repo:cw_img`
+```bash
 docker tag cw2025_backend_image:latest <container tag>
 docker push <container tag>
+# for the current location
+docker tag cw2025_backend_image:latest banew/cw2025_backend_docker_repo:cw_img
+docker push banew/cw2025_backend_docker_repo:cw_img
 ```
 Зазначимо, що в середовищі, з-під якого запускатиметься контейнтер, слід вказати наступні змінні:
 ```env

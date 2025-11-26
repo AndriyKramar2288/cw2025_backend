@@ -1,0 +1,12 @@
+[
+  {
+    "name": "com.banew.cw2025_backend_core.backend.utils.BasicMapperImpl",
+    "allDeclaredConstructors": true,
+    "allPublicMethods": true
+  },
+  {
+    "name": "com.banew.cw2025_backend_core.backend.repo.dto.CourseBasicDtoDbData",
+    "allDeclaredConstructors": true,
+    "allPublicMethods": true
+  }
+]

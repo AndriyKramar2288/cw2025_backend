@@ -1,4 +1,10 @@
 spring:
+  jpa:
+    properties:
+      hibernate:
+        bytecode:
+          provider: bytebuddy
+          use_reflection_optimizer: false
   application:
     name: cw2025_backend
   profiles:
