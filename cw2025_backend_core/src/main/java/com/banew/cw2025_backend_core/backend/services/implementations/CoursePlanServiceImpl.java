@@ -6,6 +6,7 @@ import com.banew.cw2025_backend_core.backend.entities.UserProfile;
 import com.banew.cw2025_backend_core.backend.exceptions.MyBadRequestException;
 import com.banew.cw2025_backend_core.backend.repo.CoursePlanRepository;
 import com.banew.cw2025_backend_core.backend.repo.TopicRepository;
+import com.banew.cw2025_backend_core.backend.repo.UserProfileRepository;
 import com.banew.cw2025_backend_core.backend.services.interfaces.CoursePlanService;
 import com.banew.cw2025_backend_core.backend.utils.BasicMapper;
 import lombok.AllArgsConstructor;
@@ -21,16 +22,17 @@ import java.util.List;
 @AllArgsConstructor
 public class CoursePlanServiceImpl implements CoursePlanService {
 
-    private CoursePlanRepository coursePlanRepository;
-    private TopicRepository topicRepository;
-    private BasicMapper basicMapper;
+    private final CoursePlanRepository coursePlanRepository;
+    private final TopicRepository topicRepository;
+    private final BasicMapper basicMapper;
+    private final UserProfileRepository userProfileRepository;
 
     @Override
     @CachePut(value = "coursePlans", key = "#result.id")
     @CacheEvict(value = "userProfileDetailedById", key = "#currentUser.id")
     public CoursePlanBasicDto createCoursePlan(UserProfile currentUser, CoursePlanBasicDto dto) {
         CoursePlan coursePlan = basicMapper.basicDtoToCoursePlan(dto);
-        coursePlan.setAuthor(currentUser);
+        coursePlan.setAuthor(userProfileRepository.findByIdForDetailedDto(currentUser.getId()).orElseThrow());
         coursePlanRepository.save(coursePlan);
         return basicMapper.coursePlanToBasicDto(coursePlan);
     }

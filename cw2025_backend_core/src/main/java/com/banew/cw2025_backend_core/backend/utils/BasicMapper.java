@@ -45,7 +45,9 @@ public interface BasicMapper {
     @AfterMapping
     default void linkTopics(@MappingTarget CoursePlan coursePlan) {
         if (coursePlan.getTopics() != null) {
-            coursePlan.getTopics().forEach(topic -> topic.setCoursePlan(coursePlan));
+            for (Topic topic : coursePlan.getTopics()) {
+                topic.setCoursePlan(coursePlan);
+            }
         }
     }
 }
