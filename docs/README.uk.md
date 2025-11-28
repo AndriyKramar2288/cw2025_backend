@@ -1,6 +1,7 @@
 # 'Seezu' API-service (course work 2025)
 
 Backend для мобільного застосунку **'Seezu'**.
+[🇺🇸 English](README.md) | [🇺🇦 Українська](docs/README.uk.md)
 
 ## Технології
 
