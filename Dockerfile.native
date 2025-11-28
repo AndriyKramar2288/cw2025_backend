@@ -8,20 +8,22 @@ FROM ghcr.io/graalvm/native-image-community:21 AS native-build
 WORKDIR /build
 
 # Copy Maven wrapper
-COPY --chmod=0755 mvnw mvnw
+COPY mvnw mvnw
+RUN chmod +x mvnw
+
 COPY .mvn/ .mvn/
 
 # Copy whole project
 COPY . .
 
 RUN --mount=type=cache,target=/root/.m2 \
-    ./mvnw -DskipTests clean install
+    sh ./mvnw -DskipTests clean install
 
 # Збираємо тільки core-модуль
 WORKDIR /build/cw2025_backend_core
 
 RUN --mount=type=cache,target=/root/.m2 \
-    ../mvnw -Pnative -DskipTests clean native:compile
+    sh ../mvnw -Pnative -DskipTests clean native:compile
 
 #############################################
 # 2) RUN — super small container
