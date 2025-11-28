@@ -88,6 +88,7 @@ java -jar target/app.jar
 
 Currently, the project has a **github-action** `.github\workflows\docker-image.yml`, which will automatically build
 and push the image when any push to the `master` branch is made.
+
 ---
 First, you need to build and push the image to Docker Hub.
 **There are two options**: build an image that conventionally packages the application as a JAR and runs under JVM, or build an executable file via GraalVM, which significantly improves startup time but may cause many issues.
