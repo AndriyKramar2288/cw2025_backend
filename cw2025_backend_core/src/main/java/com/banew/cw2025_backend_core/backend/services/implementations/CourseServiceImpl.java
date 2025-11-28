@@ -191,7 +191,7 @@ public class CourseServiceImpl implements CourseService {
                 "You can't modify this compendium!"
         );
 
-        if (topicCompendiumDto.notes() != null) compendium.setNotes(topicCompendiumDto.notes());
+        compendium.setNotes(topicCompendiumDto.notes());
         if (topicCompendiumDto.concepts() != null) {
             topicCompendiumDto.concepts().forEach(conceptDto -> {
 
