@@ -1,8 +1,8 @@
 # 'Seezu' API-service (course work 2025)
 
-Backend для мобільного застосунку **'Seezu'**.
+Backend for the **'Seezu'** mobile application.
 
-## Технології
+## Technologies
 
 - Java 21
 - Spring Boot
@@ -12,36 +12,36 @@ Backend для мобільного застосунку **'Seezu'**.
 - Docker
 - GraalVM
 
-## Функціонал
+## Features
 
-- Аутентифікація та авторизація користувачів
-- CRUD операції для курсів
-- ендпоінти для доєднання до курсів, прохід по темах та заповнення конспектів
-- Кешування за допомогою Spring Cache
-- Валідація та обробка помилок
-- REST API для клієнта
+- User authentication and authorization
+- CRUD operations for courses
+- Endpoints for joining courses, progressing through topics, and filling out compendia
+- Caching using Spring Cache
+- Validation and error handling
+- REST API for client
 
 ## API
 
-Всі ендпоінти знаходяться за базовим шляхом /api.
+All endpoints are located under the base path /api.
 
-#### Приклади:
+#### Examples:
 
-- **GET /api/course/** — отримати список власних курсів
-- **PUT /api/cards/{flashCardId}/concept** — оновити концепт флешкартки
+- **GET /api/course/** — get list of own courses
+- **PUT /api/cards/{flashCardId}/concept** — update flashcard concept
 
-Повна документація Swagger доступна за шляхом `/api/swagger-ui/index.html` після запуску програми.
+Full Swagger documentation is available at `/api/swagger-ui/index.html` after launching the application.
 
-## Початок роботи
-### Крок 1. Клонування репозиторію
+## Getting Started
+### Step 1. Clone the repository
 ```bash
 git clone https://github.com/AndriyKramar2288/cinema_server.git
 cd repo
 ```
-### Крок 2. Налаштування БД
-Для роботи застосунку необхідна БД postgresql. Попередньо підготуйте її (жодних схем застосовувати не потрібно).
-### Крок 3. Створення `application-dev.yaml`
-Створіть файл `application-dev.yaml` за шляхом `./cw2025_backend_core/src/main/resources/application-dev.yaml` з наступним вмістом:
+### Step 2. Database setup
+The application requires a PostgreSQL database. Prepare it in advance (no schemas need to be applied).
+### Step 3. Create `application-dev.yaml`
+Create an `application-dev.yaml` file at `./cw2025_backend_core/src/main/resources/application-dev.yaml` with the following content:
 ```yaml
 spring:
   config:
@@ -66,36 +66,35 @@ logging:
 
 secret.decoder_key: # any long string secret key
 ```
-При цьому вкажіть усі необхідні дані, що позначені **коментарями**.
-### Крок 4. Запуск
-#### Запуск за замовчуванням
+Make sure to specify all necessary data marked by **comments**.
+### Step 4. Running
+#### Default run
 ```bash
 cd ./cw2025_backend_core
 ../mvnw spring-boot:run
 ```
-Зверніть увагу, що для цього необхідно попередньо виконати установку залежностей в **локальний репозиторій**:
+Note that this requires dependencies to be installed in the **local repository** beforehand:
 ```bash
 ./mvnw clean install -DskipTests
 ```
-#### Збірка та запуск через JAR
+#### Build and run via JAR
 ```bash
-./mvnw clean package
+./mvnw clean package -DskipTests
 java -jar target/app.jar
 ```
-### Крок 5. Деплой
-Спершу слід побудувати та запушити образ на Docker Hub.
-**Є два варіанти**: будувати образ, що звично збирає застосунок в JAR та запускає з-під JVM, або ж будувати виконуваний
-файл через GraalVM, що значно підвищує швидкість запуску програми, проте може спровокувати багато проблем.
-#### Збірка образу з JAR
+### Step 5. Deployment
+First, you need to build and push the image to Docker Hub.
+**There are two options**: build an image that conventionally packages the application as a JAR and runs under JVM, or build an executable file via GraalVM, which significantly improves startup time but may cause many issues.
+#### Build image with JAR
 ```bash
-docker build . -t cw2025_backend_image
+docker build -t cw2025_backend_image .
 ```
-#### Збірка образу з файлом GraalVM
+#### Build image with GraalVM executable
 ```bash
-docker build -f Dockerfile.native -t cw2025_backend_image
+docker build -f Dockerfile.native -t cw2025_backend_image .
 ```
-Після побудови образу, його слід запушити на Docker Hub.
-Поточне розташування чинного контейнера (образу): `banew/cw2025_backend_docker_repo:cw_img`
+After building the image, it should be pushed to Docker Hub.
+Current location of the active container (image): `banew/cw2025_backend_docker_repo:cw_img`
 ```bash
 docker tag cw2025_backend_image:latest <container tag>
 docker push <container tag>
@@ -103,7 +102,7 @@ docker push <container tag>
 docker tag cw2025_backend_image:latest banew/cw2025_backend_docker_repo:cw_img
 docker push banew/cw2025_backend_docker_repo:cw_img
 ```
-Зазначимо, що в середовищі, з-під якого запускатиметься контейнтер, слід вказати наступні змінні:
+Note that the environment where the container will run should specify the following variables:
 ```env
 LOCAL_DB_URL= # production db-url, that looks like 'jdbc:postgresql://<database host>:<database port>/<database name>'
 LOCAL_DB_PASSWORD= # production postgres password

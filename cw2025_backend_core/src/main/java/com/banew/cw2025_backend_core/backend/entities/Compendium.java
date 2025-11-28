@@ -27,7 +27,7 @@ public class Compendium {
     private Topic topic;
     public CompendiumStatus status;
     private int index;
-    @OneToMany(cascade = {CascadeType.REMOVE, CascadeType.MERGE}, orphanRemoval = true, mappedBy = "compendium")
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "compendium")
     @OrderBy("id ASC")
     private List<Concept> concepts = new ArrayList<>();
 }
