@@ -14,4 +14,9 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
 
+logging:
+  level:
+    org.springframework.web.servlet: debug
+    com.banew.cw2025_backend: error
+
 secret.decoder_key: ${SECRET_DECODE_KEY}

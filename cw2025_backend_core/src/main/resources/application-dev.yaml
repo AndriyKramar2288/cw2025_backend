@@ -17,6 +17,6 @@ spring:
 
 logging:
   level:
-    org.springframework.web.servlet: DEBUG
+    org.springframework.web.servlet: debug
 
 secret.decoder_key: DICKABOABOSARle;rkewjefreljfjrejkhrewghrekhgreherkhnremnrekjnakjhkjnardnhvdksrjgvhaekgjhsedklugvhsdrkgj

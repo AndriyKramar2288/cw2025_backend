@@ -32,7 +32,7 @@ public class CoursePlanServiceImpl implements CoursePlanService {
     @CacheEvict(value = "userProfileDetailedById", key = "#currentUser.id")
     public CoursePlanBasicDto createCoursePlan(UserProfile currentUser, CoursePlanBasicDto dto) {
         CoursePlan coursePlan = basicMapper.basicDtoToCoursePlan(dto);
-        coursePlan.setAuthor(userProfileRepository.findByIdForDetailedDto(currentUser.getId()).orElseThrow());
+        coursePlan.setAuthor(currentUser);
         coursePlanRepository.save(coursePlan);
         return basicMapper.coursePlanToBasicDto(coursePlan);
     }
