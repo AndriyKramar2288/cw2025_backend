@@ -85,6 +85,7 @@ java -jar target/app.jar
 ```
 ### Step 5. Deployment
 #### Attention!
+
 Currently, the project has a **github-action** `.github\workflows\docker-image.yml`, which will automatically build
 and push the image when any push to the `master` branch is made.
 ---

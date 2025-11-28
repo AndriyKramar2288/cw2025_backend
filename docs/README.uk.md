@@ -85,6 +85,7 @@ java -jar target/app.jar
 ```
 ### Крок 5. Деплой
 #### Увага!
+
 Наразі в проекті наявний **github-action** `.github\workflows\docker-image.yml`, який автоматично побудує
 та запушить образ при будь-якому push на `master` гілку.
 ---
