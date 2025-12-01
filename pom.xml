@@ -12,7 +12,7 @@
 	<groupId>com.banew</groupId>
 	<packaging>pom</packaging>
 	<artifactId>cw2025_backend</artifactId>
-	<version>0.0.2-SNAPSHOT</version>
+	<version>0.1.0-SNAPSHOT</version>
 	<name>cw2025_backend</name>
 	<description>
 		API for the course work 2025: Creating a

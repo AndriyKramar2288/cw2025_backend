@@ -13,6 +13,8 @@ import com.banew.cw2025_backend_core.backend.repo.CourseRepository;
 import com.banew.cw2025_backend_core.backend.services.interfaces.CourseService;
 import com.banew.cw2025_backend_core.backend.utils.BasicMapper;
 import lombok.AllArgsConstructor;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
@@ -32,6 +34,7 @@ public class CourseServiceImpl implements CourseService {
     private ConceptRepository conceptRepository;
     private CompendiumRepository compendiumRepository;
     private BasicMapper basicMapper;
+    private CacheManager cacheManager;
 
     @Override
     @Cacheable(value = "courses", key = "#currentUser.id")
@@ -191,7 +194,7 @@ public class CourseServiceImpl implements CourseService {
                 "You can't modify this compendium!"
         );
 
-        compendium.setNotes(topicCompendiumDto.notes());
+        if (topicCompendiumDto.notes() != null) compendium.setNotes(topicCompendiumDto.notes());
         if (topicCompendiumDto.concepts() != null) {
             topicCompendiumDto.concepts().forEach(conceptDto -> {
 
@@ -221,6 +224,15 @@ public class CourseServiceImpl implements CourseService {
 
         compendiumRepository.save(compendium);
         return basicMapper.compendiumToDto(compendium);
+    }
+
+    @Override
+    @CacheEvict(value = "courses", key = "#authorId")
+    public void evictByAuthorId(Long authorId) {
+        coursePlanRepository.findIdByAuthorId(authorId).forEach(e -> {
+            Cache cache = cacheManager.getCache("courseById");
+            if (cache != null) cache.evict(e + "_" + authorId);
+        });
     }
 
     private CourseBasicDto courseToBasicDto(Course course) {

@@ -17,7 +17,7 @@ COPY .mvn/ .mvn/
 COPY . .
 
 RUN --mount=type=cache,target=/root/.m2 \
-    sh ./mvnw -DskipTests clean install
+    sh ./mvnw clean install
 
 # Збираємо тільки core-модуль
 WORKDIR /build/cw2025_backend_core

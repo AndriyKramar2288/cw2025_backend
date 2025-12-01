@@ -14,4 +14,5 @@ public interface CourseService {
     CourseDetailedDto endCourse(Long courseId, UserProfile currentUser);
     TopicCompendiumDto beginTopic(Long topicId, UserProfile currentUser, Long courseId);
     TopicCompendiumDto updateCompendium(TopicCompendiumDto topicCompendiumDto, UserProfile currentUser, Long courseId);
+    void evictByAuthorId(Long authorId);
 }

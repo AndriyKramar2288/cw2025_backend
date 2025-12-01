@@ -7,10 +7,10 @@ import com.banew.cw2025_backend_core.backend.exceptions.MyBadRequestException;
 import com.banew.cw2025_backend_core.backend.repo.*;
 import com.banew.cw2025_backend_core.backend.services.interfaces.CoursePlanService;
 import jakarta.transaction.Transactional;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.util.List;
 
@@ -18,6 +18,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @Transactional
+@ActiveProfiles("test")
 class CoursePlanServiceIntegrationTest {
 
     @Autowired
@@ -37,15 +38,6 @@ class CoursePlanServiceIntegrationTest {
 
     @Autowired
     private CompendiumRepository compendiumRepository;
-
-    @BeforeEach
-    void cleanDB() {
-        compendiumRepository.deleteAll();
-        courseRepository.deleteAll();
-        topicRepository.deleteAll();
-        coursePlanRepository.deleteAll();
-        userProfileRepository.deleteAll();
-    }
 
     @Test
     void createCoursePlan_withTopics_savesCorrectly() {

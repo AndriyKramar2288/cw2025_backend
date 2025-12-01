@@ -9,6 +9,8 @@ import com.banew.cw2025_backend_core.backend.exceptions.MyBadRequestException;
 import com.banew.cw2025_backend_core.backend.repo.UserProfileRepository;
 import com.banew.cw2025_backend_core.backend.services.implementations.JwtServiceImpl;
 import com.banew.cw2025_backend_core.backend.services.implementations.UserProfileServiceImpl;
+import com.banew.cw2025_backend_core.backend.services.interfaces.CoursePlanService;
+import com.banew.cw2025_backend_core.backend.services.interfaces.CourseService;
 import com.banew.cw2025_backend_core.backend.services.interfaces.JwtService;
 import com.banew.cw2025_backend_core.backend.utils.BasicMapper;
 import net.datafaker.Faker;
@@ -39,6 +41,12 @@ public class UserProfileServiceTest {
 
     @Mock
     private UserProfileRepository userProfileRepository;
+
+    @Mock
+    private CourseService courseService;
+
+    @Mock
+    private CoursePlanService coursePlanService;
 
     @Spy
     private BasicMapper basicMapper = BasicMapper.INSTANCE;

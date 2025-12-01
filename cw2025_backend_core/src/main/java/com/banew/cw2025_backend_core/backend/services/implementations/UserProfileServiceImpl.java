@@ -4,6 +4,8 @@ import com.banew.cw2025_backend_common.dto.users.*;
 import com.banew.cw2025_backend_core.backend.entities.UserProfile;
 import com.banew.cw2025_backend_core.backend.exceptions.MyBadRequestException;
 import com.banew.cw2025_backend_core.backend.repo.UserProfileRepository;
+import com.banew.cw2025_backend_core.backend.services.interfaces.CoursePlanService;
+import com.banew.cw2025_backend_core.backend.services.interfaces.CourseService;
 import com.banew.cw2025_backend_core.backend.services.interfaces.JwtService;
 import com.banew.cw2025_backend_core.backend.services.interfaces.UserProfileService;
 import com.banew.cw2025_backend_core.backend.utils.BasicMapper;
@@ -30,6 +32,8 @@ public class UserProfileServiceImpl implements UserProfileService {
     private PasswordEncoder passwordEncoder;
     private BasicMapper basicMapper;
     private JwtService jwtService;
+    private CoursePlanService coursePlanService;
+    private CourseService courseService;
 
     @Override
     public Converter<Jwt, ? extends AbstractAuthenticationToken> myJwtAuthenticationConverter() {
@@ -72,6 +76,9 @@ public class UserProfileServiceImpl implements UserProfileService {
         if (dto.username() != null) previousProfile.setUsername(dto.username());
 
         userProfileRepository.save(previousProfile);
+
+        coursePlanService.evictByAuthorId(previousProfile.getId());
+        courseService.evictByAuthorId(previousProfile.getId());
         
         return basicMapper.userProfileToBasicDto(previousProfile);
     }

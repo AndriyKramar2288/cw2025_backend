@@ -10,6 +10,8 @@ import com.banew.cw2025_backend_core.backend.repo.UserProfileRepository;
 import com.banew.cw2025_backend_core.backend.services.interfaces.CoursePlanService;
 import com.banew.cw2025_backend_core.backend.utils.BasicMapper;
 import lombok.AllArgsConstructor;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
@@ -26,6 +28,7 @@ public class CoursePlanServiceImpl implements CoursePlanService {
     private final TopicRepository topicRepository;
     private final BasicMapper basicMapper;
     private final UserProfileRepository userProfileRepository;
+    private final CacheManager cacheManager;
 
     @Override
     @CachePut(value = "coursePlans", key = "#result.id")
@@ -88,5 +91,13 @@ public class CoursePlanServiceImpl implements CoursePlanService {
                 coursePlanRepository.findById(id)
                         .orElseThrow(() -> new MyBadRequestException("Course with this ID was not found!"))
         );
+    }
+
+    @Override
+    public void evictByAuthorId(Long authorId) {
+        Cache cache = cacheManager.getCache("coursePlans");
+        if (cache != null) {
+            coursePlanRepository.findIdByAuthorId(authorId).forEach(cache::evict);
+        }
     }
 }

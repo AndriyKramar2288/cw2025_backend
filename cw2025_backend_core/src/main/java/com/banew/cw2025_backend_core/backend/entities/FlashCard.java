@@ -18,7 +18,7 @@ public class FlashCard {
     private long id;
     @Column(nullable = false)
     private int repetition = 0;
-    @Column(nullable = false)
+    @Column(nullable = false, name = "review_interval")
     private double interval = 0;
     @Column(nullable = false)
     private double easiness = 2.5;

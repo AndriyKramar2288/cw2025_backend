@@ -18,6 +18,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
@@ -30,6 +31,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest
 @Transactional
+@ActiveProfiles("test")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class FlashCardServiceImplIntegrationTest {
 
@@ -252,6 +254,7 @@ class FlashCardServiceImplIntegrationTest {
     void testAnswer_ThrowsException_WhenNotTimeToReview() {
         // Arrange
         FlashCard flashCard = createFlashCard("Test Concept", "Description", Instant.now().plus(2, ChronoUnit.DAYS));
+        flashCard.setInterval(5);
         flashCard.setLastReview(Instant.now());
         flashCardRepository.save(flashCard);
 
@@ -323,10 +326,12 @@ class FlashCardServiceImplIntegrationTest {
 
         // Картки, переглянуті сьогодні для статистики
         FlashCard todayCard1 = createFlashCard("Today 1", "Desc", null);
+        todayCard1.setInterval(3);
         todayCard1.setLastReview(Instant.now().minus(2, ChronoUnit.HOURS));
         flashCardRepository.save(todayCard1);
 
         FlashCard todayCard2 = createFlashCard("Today 2", "Desc", null);
+        todayCard2.setInterval(3);
         todayCard2.setLastReview(Instant.now().minus(1, ChronoUnit.HOURS));
         flashCardRepository.save(todayCard2);
 

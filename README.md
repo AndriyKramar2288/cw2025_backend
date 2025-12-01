@@ -45,9 +45,6 @@ The application requires a PostgreSQL database. Prepare it in advance (no schema
 Create an `application-dev.yaml` file at `./cw2025_backend_core/src/main/resources/application-dev.yaml` with the following content:
 ```yaml
 spring:
-  config:
-    activate:
-      on-profile: dev
   datasource:
     username: # your postgres user
     password: # your postgres password

@@ -45,9 +45,6 @@ cd repo
 Створіть файл `application-dev.yaml` за шляхом `./cw2025_backend_core/src/main/resources/application-dev.yaml` з наступним вмістом:
 ```yaml
 spring:
-  config:
-    activate:
-      on-profile: dev
   datasource:
     username: # your postgres user
     password: # your postgres password

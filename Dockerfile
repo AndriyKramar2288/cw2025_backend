@@ -14,7 +14,7 @@ COPY . .
 
 # Build ALL modules, including common + core
 RUN --mount=type=cache,target=/root/.m2 \
-    sh ./mvnw clean package -DskipTests
+    sh ./mvnw clean package
 
 # Copy final jar from core
 RUN cp cw2025_backend_core/target/*.jar /build/app.jar

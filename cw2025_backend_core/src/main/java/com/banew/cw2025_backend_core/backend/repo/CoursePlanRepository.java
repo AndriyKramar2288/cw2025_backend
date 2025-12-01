@@ -45,4 +45,7 @@ public interface CoursePlanRepository extends ListCrudRepository<CoursePlan, Lon
 
     @Query("select cp from CoursePlan cp left join fetch cp.topics where cp.id = ?1")
     Optional<CoursePlan> findByIdWithTopics(Long courseId);
+
+    @Query("select c.id from CoursePlan c where c.author.id = ?1")
+    List<Long> findIdByAuthorId(Long id);
 }

@@ -11,4 +11,5 @@ public interface CoursePlanService {
     List<CoursePlanBasicDto> getAllExistingPlans();
     List<CoursePlanBasicDto> getPlansBySearchQuery(String query);
     CoursePlanBasicDto getCoursePlanById(Long id);
+    void evictByAuthorId(Long authorId);
 }

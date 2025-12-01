@@ -1,7 +1,4 @@
 spring:
-  config:
-    activate:
-      on-profile: prod
   datasource:
     username: ${LOCAL_DB_USER}
     password: ${LOCAL_DB_PASSWORD}
