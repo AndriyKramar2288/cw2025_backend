@@ -48,7 +48,7 @@ public class CourseServiceImpl implements CourseService {
     @Cacheable(value = "courseById", key = "#courseId + '_' + #currentUser.id")
     public CourseDetailedDto getCourseById(UserProfile currentUser, Long courseId) {
         return basicMapper.courseToDetailedDto(
-                courseRepository.findByStudentAndCoursePlanIdWithFetch(currentUser, courseId)
+                courseRepository.findByStudentAndCoursePlanIdWithFetch(currentUser.getId(), courseId)
                         .orElseThrow(() -> new MyBadRequestException(
                         "CoursePlan with id '" + courseId + "' and this user is no exists!"))
         );
@@ -61,6 +61,7 @@ public class CourseServiceImpl implements CourseService {
                     @CacheEvict(value = "courseById", key = "#courseId + '_' + #currentUser.id")
             }
     )
+    @Transactional
     public CourseBasicDto beginCourse(Long courseId, UserProfile currentUser) {
 
         if (courseRepository.existsByStudentAndCoursePlanId(currentUser, courseId))
@@ -99,6 +100,7 @@ public class CourseServiceImpl implements CourseService {
                     @CacheEvict(value = "courseById", key = "#courseId + '_' + #currentUser.id")
             }
     )
+    @Transactional
     public CourseDetailedDto endCourse(Long courseId, UserProfile currentUser) {
 
         Course course = courseRepository.findByStudentAndCoursePlanId(currentUser, courseId)
@@ -129,6 +131,7 @@ public class CourseServiceImpl implements CourseService {
                     @CacheEvict(value = "courseById", key = "#courseId + '_' + #currentUser.id")
             }
     )
+    @Transactional
     public TopicCompendiumDto beginTopic(Long topicId, UserProfile currentUser, Long courseId) {
 
         Compendium compendium = compendiumRepository.findByTopicIdAndStudentWithCourse(topicId, currentUser)
@@ -181,6 +184,7 @@ public class CourseServiceImpl implements CourseService {
                     @CacheEvict(value = "flashCardsByUserId", key = "#currentUser.id")
             }
     )
+    @Transactional
     public TopicCompendiumDto updateCompendium(TopicCompendiumDto topicCompendiumDto,
                                                UserProfile currentUser,
                                                Long courseId) {

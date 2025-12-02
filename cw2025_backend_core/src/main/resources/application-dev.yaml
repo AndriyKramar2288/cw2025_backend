@@ -15,5 +15,8 @@ spring:
 logging:
   level:
     org.springframework.web.servlet: debug
+    org.hibernate:
+      SQL: trace
+      engine.internal.StatisticalLoggingSessionEventListener: error
 
 secret.decoder_key: DICKABOABOSARle;rkewjefreljfjrejkhrewghrekhgreherkhnremnrekjnakjhkjnardnhvdksrjgvhaekgjhsedklugvhsdrkgj

@@ -11,7 +11,14 @@ import java.util.Optional;
 
 public interface FlashCardRepository extends ListCrudRepository<FlashCard, Long> {
 
-    List<FlashCard> findByConcept_Compendium_Course_StudentAndLastReviewAfter(UserProfile student, Instant lastReview);
+    @Query("""
+        select distinct f from FlashCard f
+        join fetch f.concept c
+        join c.compendium cmp
+        join cmp.course crs
+        where crs.student.id = ?1 and f.lastReview > ?2
+        """)
+    List<FlashCard> findByStudentAndLastReviewAfter(Long studentId, Instant dayAgo);
 
     @Query("""
             select f from FlashCard f

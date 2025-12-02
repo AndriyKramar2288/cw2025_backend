@@ -20,6 +20,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -69,21 +70,23 @@ public class UserProfileServiceImpl implements UserProfileService {
             @CacheEvict(value = "userProfileById", key = "#previousProfile.id"),
             @CacheEvict(value = "userProfileDetailedById", key = "#previousProfile.id")
     })
+    @Transactional
     public UserProfileBasicDto updateUser(UserProfileBasicDto dto, UserProfile previousProfile) {
 
         if (dto.email() != null) previousProfile.setEmail(dto.email());
         if (dto.photoSrc() != null) previousProfile.setPhotoSrc(dto.photoSrc());
         if (dto.username() != null) previousProfile.setUsername(dto.username());
 
-        userProfileRepository.save(previousProfile);
-
         coursePlanService.evictByAuthorId(previousProfile.getId());
         courseService.evictByAuthorId(previousProfile.getId());
+
+        userProfileRepository.save(previousProfile);
         
         return basicMapper.userProfileToBasicDto(previousProfile);
     }
 
     @Override
+    @Transactional
     public UserTokenFormResult register(UserRegisterForm form) {
         if (userProfileRepository.findByEmail(form.email()).isPresent())
             throw new RuntimeException("User with email \"" + form.email() + "\" is already exist!");
@@ -105,6 +108,7 @@ public class UserProfileServiceImpl implements UserProfileService {
     }
 
     @Override
+    @Transactional
     public UserTokenFormResult login(UserLoginForm form) {
         var ex = new MyBadRequestException(
                 "Email or password is not correct!"

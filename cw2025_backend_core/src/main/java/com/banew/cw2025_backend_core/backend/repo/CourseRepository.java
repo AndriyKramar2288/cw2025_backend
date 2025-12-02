@@ -18,12 +18,15 @@ public interface CourseRepository extends ListCrudRepository<Course, Long> {
 
     @Query("""
             select c from Course c
-            join fetch c.coursePlan
-            left join fetch c.compendiums
+            join fetch c.coursePlan cp
+            join fetch cp.author
+            left join fetch c.compendiums cmp
+            left join fetch cmp.topic
+            left join fetch cmp.concepts
             left join fetch c.currentCompendium
-            where c.student = ?1 and c.coursePlan.id = ?2
+            where c.student.id = ?1 and c.coursePlan.id = ?2
             """)
-    Optional<Course> findByStudentAndCoursePlanIdWithFetch(UserProfile student, long id);
+    Optional<Course> findByStudentAndCoursePlanIdWithFetch(long userId, long coursePlanId);
 
     @Query("""
             select c from Course c
@@ -36,18 +39,19 @@ public interface CourseRepository extends ListCrudRepository<Course, Long> {
     select new com.banew.cw2025_backend_core.backend.repo.dto.CourseBasicDtoDbData(
         crs.id,
         crs.startedAt,
-        crs.coursePlan,
+        cp,
         t.name,
         (select count(c) from Concept c where c.compendium.course = crs),
         size(crs.compendiums)
     )
     from Course crs
-    join crs.coursePlan
+    join crs.coursePlan cp
+    join fetch cp.author au
     join crs.compendiums
     left join crs.currentCompendium cc
     left join cc.topic t
     where crs.student = ?1
-    group by crs.id, crs.startedAt, crs.coursePlan, t.name
+    group by crs.id, crs.startedAt, cp, au, t.name
 """)
     List<CourseBasicDtoDbData> findUserCourses(UserProfile student);
 }

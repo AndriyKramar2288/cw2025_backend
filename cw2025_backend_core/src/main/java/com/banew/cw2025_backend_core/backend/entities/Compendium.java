@@ -6,8 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 @Entity
 @Getter
@@ -19,7 +19,7 @@ public class Compendium {
     private long id;
     @Column(length = 4096)
     private String notes;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "course_id", nullable = false)
     private Course course;
     @ManyToOne
@@ -29,5 +29,5 @@ public class Compendium {
     private int index;
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "compendium")
     @OrderBy("id ASC")
-    private List<Concept> concepts = new ArrayList<>();
+    private Set<Concept> concepts = new LinkedHashSet<>();
 }

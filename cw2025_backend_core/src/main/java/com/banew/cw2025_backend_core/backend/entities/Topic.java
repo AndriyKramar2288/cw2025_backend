@@ -17,7 +17,7 @@ public class Topic {
     private String name;
     @Column(length = 4096)
     private String description;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "course_plan_id", nullable = false)
     private CoursePlan coursePlan;
 }

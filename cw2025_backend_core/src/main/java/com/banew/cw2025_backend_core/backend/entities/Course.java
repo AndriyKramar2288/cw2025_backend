@@ -6,8 +6,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 @Entity
 @Getter
@@ -17,16 +17,16 @@ public class Course {
     @Id
     @GeneratedValue
     private long id;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "student_id", nullable = false)
     private UserProfile student;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "course_plan_id")
     private CoursePlan coursePlan;
     private Instant startedAt;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "course", orphanRemoval = true)
     @OrderBy("index ASC")
-    private List<Compendium> compendiums = new ArrayList<>();
+    private Set<Compendium> compendiums = new LinkedHashSet<>();
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "current_compendium_id")
     private Compendium currentCompendium;

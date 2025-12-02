@@ -19,10 +19,10 @@ public class Concept {
     private String description;
     @Column(nullable = false)
     private Boolean isFlashCard = false;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "compendium_id", nullable = false)
     private Compendium compendium;
-    @OneToOne(orphanRemoval = true, cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "flashCard_id")
     private FlashCard flashCard;
 }

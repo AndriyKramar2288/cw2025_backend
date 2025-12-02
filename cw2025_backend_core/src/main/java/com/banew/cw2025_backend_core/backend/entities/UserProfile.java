@@ -8,7 +8,9 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Getter
@@ -29,7 +31,8 @@ public class UserProfile {
     @Column(length = 64)
     private List<String> roles;
     @OneToMany(mappedBy = "author",cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<CoursePlan> coursePlans;
+    @OrderBy("id ASC")
+    private Set<CoursePlan> coursePlans = new LinkedHashSet<>();
 
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return roles.stream().map((e) -> new SimpleGrantedAuthority("ROLE_" + e)).toList();

@@ -17,6 +17,7 @@ import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -33,6 +34,7 @@ public class CoursePlanServiceImpl implements CoursePlanService {
     @Override
     @CachePut(value = "coursePlans", key = "#result.id")
     @CacheEvict(value = "userProfileDetailedById", key = "#currentUser.id")
+    @Transactional
     public CoursePlanBasicDto createCoursePlan(UserProfile currentUser, CoursePlanBasicDto dto) {
         CoursePlan coursePlan = basicMapper.basicDtoToCoursePlan(dto);
         coursePlan.setAuthor(currentUser);
@@ -43,8 +45,9 @@ public class CoursePlanServiceImpl implements CoursePlanService {
     @Override
     @CachePut(value = "coursePlans", key = "#result.id")
     @CacheEvict(value = "userProfileDetailedById", key = "#currentUser.id")
+    @Transactional
     public CoursePlanBasicDto updateCoursePlan(UserProfile currentUser, CoursePlanBasicDto dto) {
-        CoursePlan existingPlan = coursePlanRepository.findById(dto.id())
+        CoursePlan existingPlan = coursePlanRepository.findByIdWithTopics(dto.id())
                 .orElseThrow(() -> new MyBadRequestException("Course with this ID was not found!"));
 
         if (!existingPlan.getAuthor().getId().equals(currentUser.getId()))
@@ -77,7 +80,7 @@ public class CoursePlanServiceImpl implements CoursePlanService {
     public List<CoursePlanBasicDto> getPlansBySearchQuery(String query) {
         return (query == null || query.isEmpty()
                 ? coursePlanRepository.findCoursesByIdForBasicDto(
-                    coursePlanRepository.findPopularCoursePlanIds(Pageable.ofSize(5)))
+                    coursePlanRepository.findPopularCoursePlanIds(Pageable.ofSize(10)))
                 : coursePlanRepository.findByText(query)
                 ).stream()
                 .map(basicMapper::coursePlanToBasicDto)
@@ -88,7 +91,7 @@ public class CoursePlanServiceImpl implements CoursePlanService {
     @Cacheable(value = "coursePlans", key = "#id")
     public CoursePlanBasicDto getCoursePlanById(Long id) {
         return basicMapper.coursePlanToBasicDto(
-                coursePlanRepository.findById(id)
+                coursePlanRepository.findByIdWithTopics(id)
                         .orElseThrow(() -> new MyBadRequestException("Course with this ID was not found!"))
         );
     }

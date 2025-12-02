@@ -87,7 +87,7 @@ class CoursePlanServiceIntegrationTest {
                                 "Learn about abobas"
                         ),
                         result.topics().get(1)
-                )
+                ), 4, null
         ));
 
         // Then
@@ -121,7 +121,7 @@ class CoursePlanServiceIntegrationTest {
                 "Java Basics",
                 null,
                 "Learn Java from scratch",
-                List.of(topic1, topic2));
+                List.of(topic1, topic2), 4, null);
     }
 
     private UserProfile createAndSaveUser(String username, String email, String password) {

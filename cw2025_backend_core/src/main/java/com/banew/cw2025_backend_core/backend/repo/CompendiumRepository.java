@@ -19,7 +19,9 @@ public interface CompendiumRepository extends ListCrudRepository<Compendium, Lon
     @Query("""
             select c from Compendium c
             join fetch c.course
-            left join fetch c.course.currentCompendium
+            join fetch c.topic
+            left join fetch c.course.currentCompendium cc
+            left join fetch cc.concepts
             where c.topic.id = ?1 and c.course.student = ?2
             """)
     Optional<Compendium> findByTopicIdAndStudentWithCourse(long id, UserProfile student);

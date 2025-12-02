@@ -11,7 +11,8 @@ public interface UserProfileRepository extends CrudRepository<UserProfile, Long>
 
     @Query("""
             select u from UserProfile u
-            left join fetch u.coursePlans
+            left join fetch u.coursePlans cp
+            left join fetch cp.topics
             where u.id = ?1
             """)
     Optional<UserProfile> findByIdForDetailedDto(Long id);

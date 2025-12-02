@@ -19,6 +19,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -67,6 +68,7 @@ public class FlashCardServiceImpl implements FlashCardService {
                     )
             }
     )
+    @Transactional
     public FlashCardBasicDto updateConcept(UserProfile currentUser, Long flashCardId, TopicCompendiumDto.ConceptBasicDto newConcept) {
         FlashCard flashCard = flashCardRepository.findByIdAndStudent(flashCardId, currentUser)
                 .orElseThrow(() -> new MyBadRequestException(
@@ -95,6 +97,7 @@ public class FlashCardServiceImpl implements FlashCardService {
                     @CacheEvict(value = "flashCardsByUserId", key = "#currentUser.id")
             }
     )
+    @Transactional
     public FlashCardBasicDto answer(FlashCardAnswer answer, UserProfile currentUser, Long flashCardId) {
 
         FlashCard flashCard = flashCardRepository.findByIdAndStudent(flashCardId, currentUser)
@@ -120,8 +123,8 @@ public class FlashCardServiceImpl implements FlashCardService {
     public FlashCardDayStats getDayStats(UserProfile currentUser) {
 
         List<FlashCard> todayCards = flashCardRepository
-                .findByConcept_Compendium_Course_StudentAndLastReviewAfter(
-                        currentUser, Instant.now().minus(1, ChronoUnit.DAYS)
+                .findByStudentAndLastReviewAfter(
+                        currentUser.getId(), Instant.now().minus(1, ChronoUnit.DAYS)
                 );
 
         List<Duration> durations = IntStream.range(0, todayCards.size() - 1)

@@ -12,7 +12,9 @@ public record CoursePlanBasicDto (
         @NotBlank @Size(min = 5, max = 255) String name,
         UserProfileBasicDto author,
         @Size(max = 2048) String description,
-        @Size(min = 1, max = 100) @NotNull List<TopicBasicDto> topics
+        @Size(min = 1, max = 100) @NotNull List<TopicBasicDto> topics,
+        long studentCount,
+        String backgroundSrc
 ) {
     public record TopicBasicDto (
             Long id,
