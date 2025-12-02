@@ -18,19 +18,13 @@ public interface CoursePlanRepository extends ListCrudRepository<CoursePlan, Lon
     long findIdByFlashCardId(long id);
 
     @Query("""
-            select c.id from CoursePlan c
-            left join c.courses crs
-            group by c order by count(crs) desc
-            """)
-    List<Long> findPopularCoursePlanIds(Pageable pageable);
-
-    @Query("""
-       select distinct c from CoursePlan c
+       select c from CoursePlan c
        left join fetch c.topics
+       left join c.courses crs
        join fetch c.author
-       where c.id in :ids
+       order by size(crs) desc
        """)
-    List<CoursePlan> findCoursesByIdForBasicDto(@Param("ids") List<Long> ids);
+    List<CoursePlan> findCoursesForBasicDto(Pageable pageable);
 
     @Query("""
             select c from CoursePlan c

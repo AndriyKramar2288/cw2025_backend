@@ -79,8 +79,7 @@ public class CoursePlanServiceImpl implements CoursePlanService {
     @Override
     public List<CoursePlanBasicDto> getPlansBySearchQuery(String query) {
         return (query == null || query.isEmpty()
-                ? coursePlanRepository.findCoursesByIdForBasicDto(
-                    coursePlanRepository.findPopularCoursePlanIds(Pageable.ofSize(10)))
+                ? coursePlanRepository.findCoursesForBasicDto(Pageable.ofSize(10))
                 : coursePlanRepository.findByText(query)
                 ).stream()
                 .map(basicMapper::coursePlanToBasicDto)

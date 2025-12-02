@@ -12,5 +12,6 @@ public record CoursePlanCourseDto (
         @NotBlank
         String name,
         UserProfileBasicDto author,
-        String description
+        String description,
+        String backgroundSrc
 ) { }

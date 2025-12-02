@@ -14,8 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -62,6 +62,7 @@ class CourseServiceIntegrationTest {
         testCoursePlan = new CoursePlan();
         testCoursePlan.setName("Java Fundamentals");
         testCoursePlan.setDescription("Learn Java basics");
+        testCoursePlan.setAuthor(testUser);
         testCoursePlan = coursePlanRepository.save(testCoursePlan);
 
         // Створюємо топіки
@@ -84,7 +85,8 @@ class CourseServiceIntegrationTest {
         topic2 = topicRepository.save(topic2);
         topic3 = topicRepository.save(topic3);
 
-        testCoursePlan.setTopics(new ArrayList<>(List.of(topic1, topic2, topic3)));
+        Stream.of(topic1, topic2, topic3).forEach(testCoursePlan.getTopics()::add);
+
         testCoursePlan = coursePlanRepository.save(testCoursePlan);
     }
 
