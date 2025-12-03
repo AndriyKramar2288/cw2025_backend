@@ -4,11 +4,13 @@ import org.hibernate.SessionFactory;
 import org.hibernate.stat.Statistics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import java.util.concurrent.atomic.AtomicLong;
 
 @Component
+@Profile("dev")
 public class TransactionStatsLogger {
     private static final Logger log = LoggerFactory.getLogger(TransactionStatsLogger.class);
 

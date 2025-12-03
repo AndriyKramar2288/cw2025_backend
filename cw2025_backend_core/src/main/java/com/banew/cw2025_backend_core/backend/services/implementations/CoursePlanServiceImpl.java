@@ -59,8 +59,8 @@ public class CoursePlanServiceImpl implements CoursePlanService {
 
         if (dto.name() != null) existingPlan.setName(dto.name());
         if (dto.description() != null) existingPlan.setDescription(dto.description());
-        if (dto.backgroundSrc() != null) existingPlan.setBackgroundSrc(dto.backgroundSrc());
         if (dto.isPublic() != null) existingPlan.setIsPublic(dto.isPublic());
+        existingPlan.setBackgroundSrc(dto.backgroundSrc());
 
         existingPlan.getTopics().forEach(t -> {
             dto.topics().forEach(topicBasicDto -> {
