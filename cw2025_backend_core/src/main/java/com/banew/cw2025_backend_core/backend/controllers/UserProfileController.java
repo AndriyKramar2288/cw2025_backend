@@ -24,7 +24,7 @@ public class UserProfileController {
 
     @GetMapping("/detailed")
     public UserProfileDetailedDto getSelfProfileDetailed(@AuthenticationPrincipal UserProfile userProfile) {
-        return userProfileService.getUserProfileDetailedById(userProfile.getId(), userProfile);
+        return userProfileService.getUserProfileDetailed(userProfile);
     }
 
     @GetMapping("/{id}/detailed")

@@ -12,6 +12,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -24,6 +25,15 @@ public class GlobalExceptionHandler {
         return new BasicResult(
                 ex.getMessage(),
                 HttpStatus.BAD_REQUEST.value()
+        );
+    }
+
+    @ResponseStatus(code = HttpStatus.NOT_FOUND)
+    @ExceptionHandler(NoResourceFoundException.class)
+    public BasicResult notFound(NoResourceFoundException ex) {
+        return new BasicResult(
+                ex.getMessage(),
+                HttpStatus.NOT_FOUND.value()
         );
     }
 

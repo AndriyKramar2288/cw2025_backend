@@ -55,7 +55,6 @@ public class UserProfileServiceImpl implements UserProfileService {
     }
 
     @Override
-    @Cacheable(value = "userProfileDetailedById", key = "#userId")
     public UserProfileDetailedDto getUserProfileDetailedById(Long userId, UserProfile currentUser) {
         var user = userProfileRepository.findByIdForDetailedDto(userId)
                 .orElseThrow(() -> new MyBadRequestException(
@@ -66,6 +65,12 @@ public class UserProfileServiceImpl implements UserProfileService {
             user.getCoursePlans().removeIf(cp -> !cp.getIsPublic());
 
         return basicMapper.userProfileToDetailedDto(user);
+    }
+
+    @Override
+    @Cacheable(value = "userProfileDetailedById", key = "#currentUser.id")
+    public UserProfileDetailedDto getUserProfileDetailed(UserProfile currentUser) {
+        return getUserProfileDetailedById(currentUser.getId(), currentUser);
     }
 
     @Override
