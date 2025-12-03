@@ -1,0 +1,1 @@
+alter table "course_plan" add column "background_src" varchar(255);
