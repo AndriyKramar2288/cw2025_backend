@@ -11,7 +11,7 @@ import java.util.Optional;
 public interface UserProfileService {
     Converter<Jwt,? extends AbstractAuthenticationToken> myJwtAuthenticationConverter();
     Optional<UserProfile> getUserById(Long userId);
-    UserProfileDetailedDto getUserProfileDetailedById(Long userId);
+    UserProfileDetailedDto getUserProfileDetailedById(Long userId, UserProfile currentUser);
     UserProfileBasicDto updateUser(UserProfileBasicDto dto, UserProfile previousProfile);
     UserTokenFormResult register(UserRegisterForm form);
     UserTokenFormResult login(UserLoginForm form);

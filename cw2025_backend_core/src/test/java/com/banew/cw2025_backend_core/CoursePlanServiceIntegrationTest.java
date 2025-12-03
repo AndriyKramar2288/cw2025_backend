@@ -75,7 +75,7 @@ class CoursePlanServiceIntegrationTest {
         CoursePlanBasicDto result = coursePlanService.createCoursePlan(user, dto);
 
         // When
-        var result2 = coursePlanService.updateCoursePlan(user, new CoursePlanBasicDto(
+        var result2 = coursePlanService.updateCoursePlan(user, result.id(), new CoursePlanBasicDto(
                 result.id(),
                 "BBCZZ",
                 result.author(),
@@ -87,7 +87,7 @@ class CoursePlanServiceIntegrationTest {
                                 "Learn about abobas"
                         ),
                         result.topics().get(1)
-                ), 4, null
+                ), 4, null, true
         ));
 
         // Then
@@ -103,7 +103,7 @@ class CoursePlanServiceIntegrationTest {
         var user2 = createAndSaveUser("John Pidoras", "aboba1588@mgail.com", "wqeqweqwq");
 
         // When / Then
-        var ex = assertThrows(MyBadRequestException.class, () -> coursePlanService.updateCoursePlan(user2, result2));
+        var ex = assertThrows(MyBadRequestException.class, () -> coursePlanService.updateCoursePlan(user2, result2.id(), result2));
         assertEquals("Course with this ID is not yours!", ex.getMessage());
     }
 
@@ -121,7 +121,7 @@ class CoursePlanServiceIntegrationTest {
                 "Java Basics",
                 null,
                 "Learn Java from scratch",
-                List.of(topic1, topic2), 4, null);
+                List.of(topic1, topic2), 4, null, true);
     }
 
     private UserProfile createAndSaveUser(String username, String email, String password) {

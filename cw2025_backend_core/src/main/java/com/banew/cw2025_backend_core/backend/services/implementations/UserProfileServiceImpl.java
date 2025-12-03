@@ -56,11 +56,14 @@ public class UserProfileServiceImpl implements UserProfileService {
 
     @Override
     @Cacheable(value = "userProfileDetailedById", key = "#userId")
-    public UserProfileDetailedDto getUserProfileDetailedById(Long userId) {
+    public UserProfileDetailedDto getUserProfileDetailedById(Long userId, UserProfile currentUser) {
         var user = userProfileRepository.findByIdForDetailedDto(userId)
                 .orElseThrow(() -> new MyBadRequestException(
                         "User with id " + userId + " was not found!"
                 ));
+
+        if (!currentUser.getId().equals(userId))
+            user.getCoursePlans().removeIf(cp -> !cp.getIsPublic());
 
         return basicMapper.userProfileToDetailedDto(user);
     }

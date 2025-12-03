@@ -69,7 +69,9 @@ public class CourseServiceImpl implements CourseService {
                     "For the current user this course is already began!"
             );
 
-        var coursePlan = coursePlanRepository.findByIdWithTopics(courseId)
+        var coursePlan = coursePlanRepository
+                .findByIdWithTopics(courseId)
+                .filter(cp -> cp.getIsPublic() || cp.getAuthor().getId().equals(currentUser.getId()))
                 .orElseThrow(() -> new MyBadRequestException(
                         "CoursePlan with id '" + courseId + "' is no exists!"
                 ));

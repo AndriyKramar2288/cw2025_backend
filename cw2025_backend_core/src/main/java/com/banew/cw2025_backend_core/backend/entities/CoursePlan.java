@@ -1,9 +1,7 @@
 package com.banew.cw2025_backend_core.backend.entities;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.Formula;
 
 import java.util.ArrayList;
@@ -14,7 +12,9 @@ import java.util.Set;
 @Entity
 @Getter
 @Setter
+@Builder
 @NoArgsConstructor
+@AllArgsConstructor
 public class CoursePlan {
     @Id
     @GeneratedValue
@@ -28,10 +28,13 @@ public class CoursePlan {
     private UserProfile author;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "coursePlan", orphanRemoval = true)
     @OrderColumn(name = "position")
+    @Builder.Default
     private List<Topic> topics = new ArrayList<>();
+    @Builder.Default
     @OneToMany(mappedBy = "coursePlan")
     private Set<Course> courses = new LinkedHashSet<>();
     private String backgroundSrc;
+    private Boolean isPublic;
     @Formula("(select count(*) from course c where c.course_plan_id = id)")
     private long studentCount;
 }

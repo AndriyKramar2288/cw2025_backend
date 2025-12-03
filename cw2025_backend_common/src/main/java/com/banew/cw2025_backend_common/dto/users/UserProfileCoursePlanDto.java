@@ -10,6 +10,8 @@ import java.util.List;
 public record UserProfileCoursePlanDto(
         Long id,
         String name, String description,
-        List<CoursePlanBasicDto.TopicBasicDto> topics
+        List<CoursePlanBasicDto.TopicBasicDto> topics,
+        String backgroundSrc,
+        Boolean isPublic
 ) {
 }

@@ -43,11 +43,11 @@ public class CoursePlanServiceImpl implements CoursePlanService {
     }
 
     @Override
-    @CachePut(value = "coursePlans", key = "#result.id")
+    @CachePut(value = "coursePlans", key = "#id")
     @CacheEvict(value = "userProfileDetailedById", key = "#currentUser.id")
     @Transactional
-    public CoursePlanBasicDto updateCoursePlan(UserProfile currentUser, CoursePlanBasicDto dto) {
-        CoursePlan existingPlan = coursePlanRepository.findByIdWithTopics(dto.id())
+    public CoursePlanBasicDto updateCoursePlan(UserProfile currentUser, Long id, CoursePlanBasicDto dto) {
+        CoursePlan existingPlan = coursePlanRepository.findByIdWithTopics(id)
                 .orElseThrow(() -> new MyBadRequestException("Course with this ID was not found!"));
 
         if (!existingPlan.getAuthor().getId().equals(currentUser.getId()))
@@ -55,6 +55,7 @@ public class CoursePlanServiceImpl implements CoursePlanService {
 
         if (dto.name() != null) existingPlan.setName(dto.name());
         if (dto.description() != null) existingPlan.setDescription(dto.description());
+        if (dto.isPublic() != null) existingPlan.setIsPublic(dto.isPublic());
 
         existingPlan.getTopics().forEach(t -> {
             dto.topics().forEach(topicBasicDto -> {
@@ -70,27 +71,30 @@ public class CoursePlanServiceImpl implements CoursePlanService {
     }
 
     @Override
-    public List<CoursePlanBasicDto> getAllExistingPlans() {
+    public List<CoursePlanBasicDto> getAllExistingPlans(UserProfile currentUser) {
         return coursePlanRepository.findCoursesForBasicDto().stream()
+                .filter(cp -> cp.getIsPublic() || cp.getAuthor().getId().equals(currentUser.getId()))
                 .map(basicMapper::coursePlanToBasicDto)
                 .toList();
     }
 
     @Override
-    public List<CoursePlanBasicDto> getPlansBySearchQuery(String query) {
+    public List<CoursePlanBasicDto> getPlansBySearchQuery(UserProfile currentUser, String query) {
         return (query == null || query.isEmpty()
                 ? coursePlanRepository.findCoursesForBasicDto(Pageable.ofSize(10))
                 : coursePlanRepository.findByText(query)
                 ).stream()
+                .filter(cp -> cp.getIsPublic() || cp.getAuthor().getId().equals(currentUser.getId()))
                 .map(basicMapper::coursePlanToBasicDto)
                 .toList();
     }
 
     @Override
     @Cacheable(value = "coursePlans", key = "#id")
-    public CoursePlanBasicDto getCoursePlanById(Long id) {
+    public CoursePlanBasicDto getCoursePlanById(UserProfile currentUser, Long id) {
         return basicMapper.coursePlanToBasicDto(
                 coursePlanRepository.findByIdWithTopics(id)
+                        .filter(cp -> cp.getIsPublic() || cp.getAuthor().getId().equals(currentUser.getId()))
                         .orElseThrow(() -> new MyBadRequestException("Course with this ID was not found!"))
         );
     }

@@ -14,7 +14,8 @@ public record CoursePlanBasicDto (
         @Size(max = 2048) String description,
         @Size(min = 1, max = 100) @NotNull List<TopicBasicDto> topics,
         long studentCount,
-        String backgroundSrc
+        String backgroundSrc,
+        Boolean isPublic
 ) {
     public record TopicBasicDto (
             Long id,

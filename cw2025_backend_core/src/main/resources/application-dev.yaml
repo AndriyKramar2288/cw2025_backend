@@ -4,13 +4,6 @@ spring:
     password: Shift2201
     url: jdbc:postgresql://localhost:5432/cs2025_db
     driver-class-name: org.postgresql.Driver
-  jpa:
-    hibernate:
-      ddl-auto: update
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
-        generate_statistics: true
 
 logging:
   level:

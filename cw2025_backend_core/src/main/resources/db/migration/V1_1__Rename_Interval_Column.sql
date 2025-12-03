@@ -1,0 +1,1 @@
+ALTER TABLE flash_card RENAME COLUMN interval TO review_interval;

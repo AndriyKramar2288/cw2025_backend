@@ -43,7 +43,9 @@ class CourseServiceIntegrationTest {
     private UserProfileRepository userProfileRepository;
 
     private UserProfile testUser;
+    private UserProfile testUser2;
     private CoursePlan testCoursePlan;
+    private CoursePlan privateCoursePlan;
     private Topic topic1;
     private Topic topic2;
     private Topic topic3;
@@ -88,6 +90,24 @@ class CourseServiceIntegrationTest {
         Stream.of(topic1, topic2, topic3).forEach(testCoursePlan.getTopics()::add);
 
         testCoursePlan = coursePlanRepository.save(testCoursePlan);
+
+        testUser2 = new UserProfile();
+        testUser2.setEmail("student2@test.com");
+        testUser2.setUsername("Test Student2");
+        testUser2.setPassword("encodedPassword2");
+        testUser2.setRoles(List.of("USER"));
+        testUser2 = userProfileRepository.save(testUser2);
+
+        privateCoursePlan = CoursePlan.builder()
+                .name("private course")
+                .description("qweqwewqqw")
+                .isPublic(false)
+                .author(testUser2)
+                .build();
+
+        privateCoursePlan.getTopics().add(Topic.builder().name("qwewqe").coursePlan(privateCoursePlan).build());
+
+        privateCoursePlan = coursePlanRepository.save(privateCoursePlan);
     }
 
     // ========== GET USER COURSES TESTS ==========
@@ -113,7 +133,7 @@ class CourseServiceIntegrationTest {
         // Then
         assertNotNull(courses);
         assertEquals(1, courses.size());
-        assertEquals("Java Fundamentals", courses.get(0).coursePlan().name());
+        assertEquals("Java Fundamentals", courses.getFirst().coursePlan().name());
     }
 
     // ========== BEGIN COURSE TESTS ==========
@@ -128,6 +148,26 @@ class CourseServiceIntegrationTest {
 
         assertTrue(exception.getMessage().contains("is no exists"));
         assertEquals(0, courseRepository.findByStudent(testUser).size());
+    }
+
+    @Test
+    void beginCourse_notSelfPrivateCoursePlan_failure() {
+        // When & Then
+        MyBadRequestException exception = assertThrows(
+                MyBadRequestException.class,
+                () -> courseService.beginCourse(privateCoursePlan.getId(), testUser)
+        );
+
+        assertTrue(exception.getMessage().contains("is no exists"));
+        assertEquals(0, courseRepository.findByStudent(testUser).size());
+    }
+
+    @Test
+    void beginCourse_selfPrivateCoursePlan_success() {
+        // When & Then
+        var result =  courseService.beginCourse(privateCoursePlan.getId(), testUser2);
+        assertNotNull(result);
+        assertEquals(1, courseRepository.findByStudent(testUser2).size());
     }
 
     // ========== BEGIN TOPIC TESTS ==========
@@ -146,7 +186,7 @@ class CourseServiceIntegrationTest {
 
         // Перевіряємо, що currentCompendiumId встановлено
         List<Course> courses = courseRepository.findByStudent(testUser);
-        assertNotNull(courses.get(0).getCurrentCompendium());
+        assertNotNull(courses.getFirst().getCurrentCompendium());
     }
 
     @Test
@@ -289,7 +329,7 @@ class CourseServiceIntegrationTest {
         );
 
         TopicCompendiumDto saved = courseService.updateCompendium(updateDto1, testUser, crs.id());
-        Long conceptId = saved.concepts().get(0).id();
+        Long conceptId = saved.concepts().getFirst().id();
 
         // When - оновлюємо існуючий концепт
         var updatedConcept = new TopicCompendiumDto.ConceptBasicDto(
@@ -309,7 +349,7 @@ class CourseServiceIntegrationTest {
         TopicCompendiumDto result = courseService.updateCompendium(updateDto2, testUser, crs.id());
 
         // Then
-        assertEquals("New description", result.concepts().get(0).description());
+        assertEquals("New description", result.concepts().getFirst().description());
     }
 
     @Test

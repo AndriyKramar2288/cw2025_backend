@@ -23,25 +23,28 @@ public class CoursePlanController {
         return coursePlanService.createCoursePlan(currentUser, dto);
     }
 
-    @PatchMapping("/")
-    public CoursePlanBasicDto updateCoursePlan(@AuthenticationPrincipal UserProfile currentUser,
-                                               @RequestBody @Valid CoursePlanBasicDto dto) {
-        return coursePlanService.updateCoursePlan(currentUser, dto);
+    @GetMapping("/{courseId}")
+    public CoursePlanBasicDto getCoursePlanById(@AuthenticationPrincipal UserProfile currentUser,
+                                                @PathVariable Long courseId) {
+        return coursePlanService.getCoursePlanById(currentUser, courseId);
     }
 
-    @GetMapping("/{courseId}")
-    public CoursePlanBasicDto getCoursePlanById(@PathVariable Long courseId) {
-        return coursePlanService.getCoursePlanById(courseId);
+    @PatchMapping("/{courseId}")
+    public CoursePlanBasicDto updateCoursePlan(@AuthenticationPrincipal UserProfile currentUser,
+                                                @PathVariable Long courseId,
+                                               @RequestBody @Valid CoursePlanBasicDto dto) {
+        return coursePlanService.updateCoursePlan(currentUser, courseId, dto);
     }
 
     @GetMapping("/search")
-    public List<CoursePlanBasicDto> getPlansBySearchQuery(@RequestParam(value = "query", required = false)
-                                                              String searchQuery) {
-        return coursePlanService.getPlansBySearchQuery(searchQuery);
+    public List<CoursePlanBasicDto> getPlansBySearchQuery(@AuthenticationPrincipal UserProfile currentUser,
+                                                          @RequestParam(value = "query", required = false)
+                                                          String searchQuery) {
+        return coursePlanService.getPlansBySearchQuery(currentUser, searchQuery);
     }
 
     @GetMapping("/")
-    public List<CoursePlanBasicDto> getAllExistingPlans() {
-        return coursePlanService.getAllExistingPlans();
+    public List<CoursePlanBasicDto> getAllExistingPlans(@AuthenticationPrincipal UserProfile currentUser) {
+        return coursePlanService.getAllExistingPlans(currentUser);
     }
 }
