@@ -5,6 +5,7 @@ import com.banew.cw2025_backend_core.backend.entities.UserProfile;
 import com.banew.cw2025_backend_core.backend.services.interfaces.CoursePlanService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,6 +19,7 @@ public class CoursePlanController {
     private CoursePlanService coursePlanService;
 
     @PostMapping("/")
+    @ResponseStatus(HttpStatus.CREATED)
     public CoursePlanBasicDto createCoursePlan(@AuthenticationPrincipal UserProfile currentUser,
                                                @RequestBody @Valid CoursePlanBasicDto dto) {
         return coursePlanService.createCoursePlan(currentUser, dto);

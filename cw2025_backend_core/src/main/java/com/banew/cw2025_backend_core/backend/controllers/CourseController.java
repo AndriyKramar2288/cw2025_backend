@@ -6,6 +6,7 @@ import com.banew.cw2025_backend_common.dto.courses.TopicCompendiumDto;
 import com.banew.cw2025_backend_core.backend.entities.UserProfile;
 import com.banew.cw2025_backend_core.backend.services.interfaces.CourseService;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,9 +31,17 @@ public class CourseController {
     }
 
     @PostMapping("/by-plan/{courseId}/start")
+    @ResponseStatus(HttpStatus.CREATED)
     public CourseBasicDto beginCourse(@PathVariable(name = "courseId") Long courseId,
                                       @AuthenticationPrincipal UserProfile currentUser) {
         return courseService.beginCourse(courseId, currentUser);
+    }
+
+    @DeleteMapping("/by-plan/{courseId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteCourse(@PathVariable(name = "courseId") Long courseId,
+                                      @AuthenticationPrincipal UserProfile currentUser) {
+        courseService.deleteCourseById(currentUser, courseId);
     }
 
     @PostMapping("/by-plan/{courseId}/end")

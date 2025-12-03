@@ -5,8 +5,7 @@ import com.banew.cw2025_backend_core.backend.entities.CoursePlan;
 import com.banew.cw2025_backend_core.backend.entities.UserProfile;
 import com.banew.cw2025_backend_core.backend.exceptions.MyBadRequestException;
 import com.banew.cw2025_backend_core.backend.repo.CoursePlanRepository;
-import com.banew.cw2025_backend_core.backend.repo.TopicRepository;
-import com.banew.cw2025_backend_core.backend.repo.UserProfileRepository;
+import com.banew.cw2025_backend_core.backend.repo.CourseRepository;
 import com.banew.cw2025_backend_core.backend.services.interfaces.CoursePlanService;
 import com.banew.cw2025_backend_core.backend.utils.BasicMapper;
 import lombok.AllArgsConstructor;
@@ -15,6 +14,7 @@ import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,10 +26,9 @@ import java.util.List;
 public class CoursePlanServiceImpl implements CoursePlanService {
 
     private final CoursePlanRepository coursePlanRepository;
-    private final TopicRepository topicRepository;
     private final BasicMapper basicMapper;
-    private final UserProfileRepository userProfileRepository;
     private final CacheManager cacheManager;
+    private final CourseRepository courseRepository;
 
     @Override
     @CachePut(value = "coursePlans", key = "#result.id")
@@ -43,8 +42,13 @@ public class CoursePlanServiceImpl implements CoursePlanService {
     }
 
     @Override
-    @CachePut(value = "coursePlans", key = "#id")
-    @CacheEvict(value = "userProfileDetailedById", key = "#currentUser.id")
+    @Caching(
+            put = @CachePut(value = "coursePlans", key = "#id"),
+            evict = {
+                    @CacheEvict(value = "userProfileDetailedById", key = "#currentUser.id"),
+                    @CacheEvict(value = "courses", key = "#currentUser.id")
+            }
+    )
     @Transactional
     public CoursePlanBasicDto updateCoursePlan(UserProfile currentUser, Long id, CoursePlanBasicDto dto) {
         CoursePlan existingPlan = coursePlanRepository.findByIdWithTopics(id)
@@ -55,6 +59,7 @@ public class CoursePlanServiceImpl implements CoursePlanService {
 
         if (dto.name() != null) existingPlan.setName(dto.name());
         if (dto.description() != null) existingPlan.setDescription(dto.description());
+        if (dto.backgroundSrc() != null) existingPlan.setBackgroundSrc(dto.backgroundSrc());
         if (dto.isPublic() != null) existingPlan.setIsPublic(dto.isPublic());
 
         existingPlan.getTopics().forEach(t -> {
@@ -64,6 +69,11 @@ public class CoursePlanServiceImpl implements CoursePlanService {
                     if (topicBasicDto.description() != null) t.setDescription(topicBasicDto.description());
                 }
             });
+        });
+
+        var cache = cacheManager.getCache("courseById");
+        if (cache != null) courseRepository.findByCoursePlanIdWithStudent(id).forEach(c -> {
+            cache.evict(id + "_" + c.getStudent().getId());
         });
 
         coursePlanRepository.save(existingPlan);

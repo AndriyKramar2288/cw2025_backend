@@ -6,10 +6,7 @@ import com.banew.cw2025_backend_common.dto.courses.CourseDetailedDto;
 import com.banew.cw2025_backend_common.dto.courses.TopicCompendiumDto;
 import com.banew.cw2025_backend_core.backend.entities.*;
 import com.banew.cw2025_backend_core.backend.exceptions.MyBadRequestException;
-import com.banew.cw2025_backend_core.backend.repo.CompendiumRepository;
-import com.banew.cw2025_backend_core.backend.repo.ConceptRepository;
-import com.banew.cw2025_backend_core.backend.repo.CoursePlanRepository;
-import com.banew.cw2025_backend_core.backend.repo.CourseRepository;
+import com.banew.cw2025_backend_core.backend.repo.*;
 import com.banew.cw2025_backend_core.backend.services.interfaces.CourseService;
 import com.banew.cw2025_backend_core.backend.utils.BasicMapper;
 import lombok.AllArgsConstructor;
@@ -35,6 +32,7 @@ public class CourseServiceImpl implements CourseService {
     private CompendiumRepository compendiumRepository;
     private BasicMapper basicMapper;
     private CacheManager cacheManager;
+    private final FlashCardRepository flashCardRepository;
 
     @Override
     @Cacheable(value = "courses", key = "#currentUser.id")
@@ -52,6 +50,28 @@ public class CourseServiceImpl implements CourseService {
                         .orElseThrow(() -> new MyBadRequestException(
                         "CoursePlan with id '" + courseId + "' and this user is no exists!"))
         );
+    }
+
+    @Override
+    @Caching(
+            evict = {
+                    @CacheEvict(value = "courses", key = "#currentUser.id"),
+                    @CacheEvict(value = "courseById", key = "#courseId + '_' + #currentUser.id")
+            }
+    )
+    @Transactional
+    public void deleteCourseById(UserProfile currentUser, Long courseId) {
+        Long id = courseRepository.findIdByStudentAndCoursePlanId(currentUser, courseId)
+                .orElseThrow(() -> new MyBadRequestException(
+                        "There is no compendium for user '"
+                                + currentUser.getUsername()
+                                + "' and this course-plan!'"
+                                + "'!"
+                ));
+
+        conceptRepository.deleteByCourseId(id);
+        compendiumRepository.deleteByCourseId(id);
+        courseRepository.deleteById(id);
     }
 
     @Override

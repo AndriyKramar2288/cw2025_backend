@@ -19,7 +19,7 @@ public class CoursePlan {
     @Id
     @GeneratedValue
     private long id;
-    @Column(length = 255, nullable = false)
+    @Column(nullable = false)
     private String name;
     @Column(length = 4096)
     private String description;
@@ -34,7 +34,8 @@ public class CoursePlan {
     @OneToMany(mappedBy = "coursePlan")
     private Set<Course> courses = new LinkedHashSet<>();
     private String backgroundSrc;
-    private Boolean isPublic;
+    @Builder.Default
+    private Boolean isPublic = true;
     @Formula("(select count(*) from course c where c.course_plan_id = id)")
     private long studentCount;
 }

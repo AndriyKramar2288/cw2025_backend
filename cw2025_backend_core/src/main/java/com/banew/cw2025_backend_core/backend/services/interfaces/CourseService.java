@@ -10,6 +10,7 @@ import java.util.List;
 public interface CourseService {
     List<CourseBasicDto> getUserCourses(UserProfile currentUser);
     CourseDetailedDto getCourseById(UserProfile currentUser, Long courseId);
+    void deleteCourseById(UserProfile currentUser, Long courseId);
     CourseBasicDto beginCourse(Long courseId, UserProfile currentUser);
     CourseDetailedDto endCourse(Long courseId, UserProfile currentUser);
     TopicCompendiumDto beginTopic(Long topicId, UserProfile currentUser, Long courseId);

@@ -3,6 +3,7 @@ package com.banew.cw2025_backend_core.backend.repo;
 import com.banew.cw2025_backend_core.backend.entities.Compendium;
 import com.banew.cw2025_backend_core.backend.entities.Course;
 import com.banew.cw2025_backend_core.backend.entities.UserProfile;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.ListCrudRepository;
 
@@ -27,4 +28,11 @@ public interface CompendiumRepository extends ListCrudRepository<Compendium, Lon
     Optional<Compendium> findByTopicIdAndStudentWithCourse(long id, UserProfile student);
 
     long countByCourse(Course course);
+
+    @Modifying
+    @Query("""
+            delete from Compendium c
+            where c.course.id = ?1
+            """)
+    void deleteByCourseId(Long id);
 }
