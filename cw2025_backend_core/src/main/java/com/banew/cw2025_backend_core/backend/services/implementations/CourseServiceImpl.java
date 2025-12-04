@@ -69,6 +69,7 @@ public class CourseServiceImpl implements CourseService {
                                 + "'!"
                 ));
 
+        courseRepository.updateCurrentCompendiumById(null, id);
         conceptRepository.deleteByCourseId(id);
         compendiumRepository.deleteByCourseId(id);
         courseRepository.deleteById(id);

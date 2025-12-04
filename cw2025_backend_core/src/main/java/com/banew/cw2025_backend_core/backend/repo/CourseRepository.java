@@ -1,10 +1,13 @@
 package com.banew.cw2025_backend_core.backend.repo;
 
+import com.banew.cw2025_backend_core.backend.entities.Compendium;
 import com.banew.cw2025_backend_core.backend.entities.Course;
 import com.banew.cw2025_backend_core.backend.entities.UserProfile;
 import com.banew.cw2025_backend_core.backend.repo.dto.CourseBasicDtoDbData;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.ListCrudRepository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -65,4 +68,9 @@ public interface CourseRepository extends ListCrudRepository<Course, Long> {
 
     @Query("select c from Course c join fetch c.student where c.coursePlan.id = ?1")
     List<Course> findByCoursePlanIdWithStudent(long id);
+
+    @Transactional
+    @Modifying
+    @Query("update Course c set c.currentCompendium = ?1 where c.id = ?2")
+    void updateCurrentCompendiumById(Compendium currentCompendium, long id);
 }

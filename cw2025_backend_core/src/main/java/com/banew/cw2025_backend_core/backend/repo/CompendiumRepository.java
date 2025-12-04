@@ -6,6 +6,7 @@ import com.banew.cw2025_backend_core.backend.entities.UserProfile;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.ListCrudRepository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -30,6 +31,7 @@ public interface CompendiumRepository extends ListCrudRepository<Compendium, Lon
     long countByCourse(Course course);
 
     @Modifying
+    @Transactional
     @Query("""
             delete from Compendium c
             where c.course.id = ?1
