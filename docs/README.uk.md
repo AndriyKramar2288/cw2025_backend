@@ -12,6 +12,9 @@ Backend для мобільного застосунку **'Seezu'**.
 - Maven
 - Docker
 - GraalVM
+- MapStruct
+- Flyway
+- OpenAPI / Swagger
 
 ## Функціонал
 
