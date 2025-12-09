@@ -20,7 +20,7 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build -t cw2025_backend_image .
+          docker build -f Dockerfile.native -t cw2025_backend_image .
 
       - name: Tag image
         run: |
