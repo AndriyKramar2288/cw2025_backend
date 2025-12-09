@@ -54,8 +54,6 @@ spring:
     url: # db-url, that looks like 'jdbc:postgresql://<your database host>:<database port>/<database name>'
     driver-class-name: org.postgresql.Driver
   jpa:
-    hibernate:
-      ddl-auto: update
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
