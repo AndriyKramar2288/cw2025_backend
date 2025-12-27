@@ -1,6 +1,8 @@
 package com.banew.cw2025_backend_core.backend.entities;
 
+import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -22,9 +24,12 @@ public class FlashCard {
     private double interval = 0;
     @Column(nullable = false)
     private double easiness = 2.5;
+    @Nullable
     private Instant lastReview;
+    @Nullable
     private Instant dueReview; // after this instant it should be reviewed
     @OneToOne(mappedBy = "flashCard")
+    @NotNull
     private Concept concept;
 
     public void setLastReview(Instant lastReview) {

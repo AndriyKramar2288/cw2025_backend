@@ -1,4 +1,4 @@
-package com.banew.cw2025_backend_core;
+package com.banew.cw2025_backend_core.integration;
 
 import com.banew.cw2025_backend_common.dto.cards.FlashCardAnswer;
 import com.banew.cw2025_backend_common.dto.cards.FlashCardBasicDto;
@@ -59,11 +59,13 @@ class FlashCardServiceImplIntegrationTest {
         testUser = new UserProfile();
         testUser.setEmail("test@example.com");
         testUser.setUsername("Test User");
+        testUser.setPassword("wqewek343erwe!wer@");
         entityManager.persist(testUser);
 
         // Створення тестового курсу
         testCoursePlan = new CoursePlan();
         testCoursePlan.setName("Test Course Plan");
+        testCoursePlan.setAuthor(testUser);
         entityManager.persist(testCoursePlan);
 
         testTopic = new Topic();
@@ -74,6 +76,7 @@ class FlashCardServiceImplIntegrationTest {
         testCourse = new Course();
         testCourse.setStudent(testUser);
         testCourse.setCoursePlan(testCoursePlan);
+        testCourse.setStartedAt(Instant.now());
         entityManager.persist(testCourse);
 
         testCompendium = new Compendium();

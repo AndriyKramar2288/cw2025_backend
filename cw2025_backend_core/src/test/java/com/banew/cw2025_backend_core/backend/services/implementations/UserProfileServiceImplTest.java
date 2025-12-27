@@ -1,4 +1,4 @@
-package com.banew.cw2025_backend_core;
+package com.banew.cw2025_backend_core.backend.services.implementations;
 
 import com.banew.cw2025_backend_common.dto.users.UserLoginForm;
 import com.banew.cw2025_backend_common.dto.users.UserProfileBasicDto;
@@ -7,8 +7,6 @@ import com.banew.cw2025_backend_common.dto.users.UserTokenFormResult;
 import com.banew.cw2025_backend_core.backend.entities.UserProfile;
 import com.banew.cw2025_backend_core.backend.exceptions.MyBadRequestException;
 import com.banew.cw2025_backend_core.backend.repo.UserProfileRepository;
-import com.banew.cw2025_backend_core.backend.services.implementations.JwtServiceImpl;
-import com.banew.cw2025_backend_core.backend.services.implementations.UserProfileServiceImpl;
 import com.banew.cw2025_backend_core.backend.services.interfaces.CoursePlanService;
 import com.banew.cw2025_backend_core.backend.services.interfaces.CourseService;
 import com.banew.cw2025_backend_core.backend.services.interfaces.JwtService;
@@ -35,7 +33,7 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.util.ReflectionTestUtils.setField;
 
 @ExtendWith(MockitoExtension.class)
-public class UserProfileServiceTest {
+public class UserProfileServiceImplTest {
     @InjectMocks
     private UserProfileServiceImpl userProfileService;
 

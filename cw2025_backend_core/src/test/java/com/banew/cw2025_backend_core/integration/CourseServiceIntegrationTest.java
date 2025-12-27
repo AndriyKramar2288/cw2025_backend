@@ -1,4 +1,4 @@
-package com.banew.cw2025_backend_core;
+package com.banew.cw2025_backend_core.integration;
 
 import com.banew.cw2025_backend_common.dto.courses.CompendiumStatus;
 import com.banew.cw2025_backend_common.dto.courses.CourseBasicDto;

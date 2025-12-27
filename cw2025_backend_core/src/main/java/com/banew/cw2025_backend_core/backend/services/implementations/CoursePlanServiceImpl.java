@@ -30,6 +30,8 @@ public class CoursePlanServiceImpl implements CoursePlanService {
     private final CacheManager cacheManager;
     private final CourseRepository courseRepository;
 
+    public static int PAGE_SIZE = 10;
+
     @Override
     @CachePut(value = "coursePlans", key = "#result.id")
     @CacheEvict(value = "userProfileDetailedById", key = "#currentUser.id")
@@ -91,7 +93,7 @@ public class CoursePlanServiceImpl implements CoursePlanService {
     @Override
     public List<CoursePlanBasicDto> getPlansBySearchQuery(UserProfile currentUser, String query) {
         return (query == null || query.isEmpty()
-                ? coursePlanRepository.findCoursesForBasicDto(Pageable.ofSize(10))
+                ? coursePlanRepository.findCoursesForBasicDto(Pageable.ofSize(PAGE_SIZE))
                 : coursePlanRepository.findByText(query)
                 ).stream()
                 .filter(cp -> cp.getIsPublic() || cp.getAuthor().getId().equals(currentUser.getId()))
