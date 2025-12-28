@@ -2,6 +2,7 @@ package com.banew.cw2025_backend_core.backend.services.implementations;
 
 import com.banew.cw2025_backend_common.dto.coursePlans.CoursePlanBasicDto;
 import com.banew.cw2025_backend_core.backend.entities.CoursePlan;
+import com.banew.cw2025_backend_core.backend.entities.Topic;
 import com.banew.cw2025_backend_core.backend.entities.UserProfile;
 import com.banew.cw2025_backend_core.backend.exceptions.MyBadRequestException;
 import com.banew.cw2025_backend_core.backend.repo.CoursePlanRepository;
@@ -57,7 +58,59 @@ class CoursePlanServiceImplTest {
     }
 
     @Test
-    void createCoursePlan() {
+    void createCoursePlan_TryCreateNewCoursePlan_Success() {
+        // given
+        var cpForm = Instancio
+                .of(CoursePlanBasicDto.class)
+                .set(Select.field(CoursePlanBasicDto::id), null)
+                .set(Select.field(CoursePlanBasicDto::author), null)
+                .create();
+        var prevUserCpCount = user.getCoursePlans().size();
+        // when
+        when(coursePlanRepository.save(any())).thenAnswer((i) -> {
+            var cp = (CoursePlan) i.getArgument(0);
+            cp.setId(Instancio.create(Long.class));
+            cp.getAuthor().getCoursePlans().add(cp);
+            return cp;
+        });
+        // then
+        var r = service.createCoursePlan(user, cpForm);
+        assertNotNull(r);
+        assertEquals(basicMapper.userProfileToBasicDto(user), r.author());
+        assertNotNull(r.id());
+        assertEquals(prevUserCpCount + 1, user.getCoursePlans().size());
+        verify(coursePlanRepository).save(any());
+    }
+
+    @Test
+    void updateCoursePlan_TryUpdateCoursePlan_SuccessResult() {
+        // given
+        var cp = Instancio.of(CoursePlan.class)
+                .set(Select.field(CoursePlan::getAuthor), user)
+                .set(Select.field(CoursePlan::getTopics), Instancio.ofList(Topic.class)
+                        .size(5)
+                        .create())
+                .create();
+        cp.getTopics().forEach(t -> t.setCoursePlan(cp));
+        user.getCoursePlans().add(cp);
+        var topicToChange = cp.getTopics().getFirst(); // topic, which we will update
+        topicToChange.setName(Instancio.create(String.class));
+        topicToChange.setDescription(Instancio.create(String.class));
+        var newCpForm = Instancio.of(CoursePlanBasicDto.class)
+                .set(Select.field(CoursePlanBasicDto::id), cp.getId())
+                .create();
+        newCpForm.topics().add(basicMapper.topicToBasicDto(topicToChange));
+        // when
+        when(coursePlanRepository.findByIdWithTopics(cp.getId())).thenReturn(Optional.of(cp));
+        when(coursePlanRepository.save(any())).thenAnswer((i) -> i.getArgument(0));
+        // then
+        var r = service.updateCoursePlan(user, cp.getId(), newCpForm);
+        assertEquals(newCpForm.name(), r.name());
+        assertEquals(newCpForm.backgroundSrc(), r.backgroundSrc());
+        assertEquals(newCpForm.isPublic(), r.isPublic());
+        assertEquals(basicMapper.userProfileToBasicDto(user), r.author());
+        assertTrue(r.topics().stream().anyMatch(t -> t.equals(basicMapper.topicToBasicDto(topicToChange))));
+        verify(coursePlanRepository).save(any());
     }
 
     @Test
@@ -84,7 +137,7 @@ class CoursePlanServiceImplTest {
         // then
         var ex = assertThrows(MyBadRequestException.class,
                 () -> service.updateCoursePlan(user,
-                        1488L,
+                        Instancio.create(Long.class),
                         Instancio.create(CoursePlanBasicDto.class)));
         assertEquals("Course with this ID was not found!", ex.getMessage().trim());
         verify(coursePlanRepository).findByIdWithTopics(any());

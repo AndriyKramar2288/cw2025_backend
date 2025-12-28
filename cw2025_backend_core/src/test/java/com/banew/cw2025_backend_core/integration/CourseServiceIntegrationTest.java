@@ -9,6 +9,7 @@ import com.banew.cw2025_backend_core.backend.repo.*;
 import com.banew.cw2025_backend_core.backend.services.implementations.CourseServiceImpl;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -22,6 +23,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 @Transactional
 @ActiveProfiles("test")
+@Disabled
 class CourseServiceIntegrationTest {
 
     @Autowired

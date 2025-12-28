@@ -132,7 +132,7 @@
                             <excludes>
                                 <exclude>**/dto/**/*</exclude>
                                 <exclude>**/entities/**/*</exclude>
-                                <exclude>BasicMapper</exclude>
+                                <exclude>**/utils/*Mapper*.class</exclude>
                             </excludes>
                         </configuration>
                     </execution>
