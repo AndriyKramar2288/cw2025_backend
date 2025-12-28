@@ -248,7 +248,7 @@ class FlashCardServiceImplIntegrationTest {
         // Assert
         FlashCard updated = flashCardRepository.findById(flashCard.getId()).orElseThrow();
         assertThat(updated.getRepetition()).isEqualTo(3);
-        assertThat(updated.getInterval()).isEqualTo(15.0); // 6 * 2.5
+        assertThat(updated.getInterval()).isEqualTo(16.0);
         assertThat(updated.getEasiness()).isGreaterThan(2.5); // Easiness збільшується для EASY
     }
 

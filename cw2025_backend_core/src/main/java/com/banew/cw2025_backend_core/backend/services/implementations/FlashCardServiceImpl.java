@@ -180,6 +180,10 @@ public class FlashCardServiceImpl implements FlashCardService {
                                                double interval,
                                                double easiness,
                                                int quality) {
+
+        easiness = easiness + (0.1 - (5 - quality)*(0.08 + (5-quality)*0.02));
+        easiness = Math.max(1.3, easiness);
+
         if (quality < 3) {
             repetitions = 0;
             interval = 0;
@@ -190,8 +194,6 @@ public class FlashCardServiceImpl implements FlashCardService {
             else interval = Math.round(interval * easiness);
             repetitions++;
         }
-
-        easiness = easiness + (0.1 - (5 - quality)*(0.08 + (5-quality)*0.02));
 
         return new FlashCardResolveResult(
                 repetitions, interval, easiness
