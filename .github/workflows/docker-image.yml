@@ -2,7 +2,7 @@ name: Build & Push Docker Image
 
 on:
   push:
-    branches: [ "master" ]
+    branches: [ "removed-aboba-kek" ]
 
 jobs:
   build-and-push:
