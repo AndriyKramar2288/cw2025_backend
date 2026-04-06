@@ -34,7 +34,7 @@ public class SecurityConfig {
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
                 .authorizeHttpRequests(req -> req
-                        .requestMatchers("/actuator/**").hasRole("ADMIN_SERVICE")
+                        //.requestMatchers("/actuator/**").hasRole("ADMIN_SERVICE")
                         .requestMatchers("/auth/**", "/swagger-ui/**", "/v3/**").permitAll()
                         .requestMatchers("/users/**").hasRole("USER")
                         .requestMatchers("/admin/**").hasRole("ADMIN")
